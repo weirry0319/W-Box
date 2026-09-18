@@ -567,7 +567,10 @@ section.active{display:flex}
                   <div class="name" id="im-tplName">template.png</div>
                   <div id="im-tplDims" style="color:var(--c-3);font-size:10px">-- × --</div>
                 </div>
-                <button class="tpl-rep" onclick="event.stopPropagation();document.getElementById('im-tplInput').click()">更换</button>
+                <div style="display:flex;gap:6px;flex-shrink:0">
+                  <button class="tpl-rep" onclick="event.stopPropagation();document.getElementById('im-tplInput').click()">更换</button>
+                  <button class="tpl-rep" style="color:var(--c-danger);background:#fef2f2" onclick="event.stopPropagation();imClearTpl()">清除</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1076,6 +1079,17 @@ document.addEventListener('keydown', (e) => {
     img.onerror = ()=>{ URL.revokeObjectURL(url); toast('模板加载失败'); };
     img.src = url;
   }
+
+  // 清除已上传的顶层模板
+  window.imClearTpl = function(){
+    if(imTpl && imTpl._url) URL.revokeObjectURL(imTpl._url);
+    imTpl = null;
+    G('tplPvImg').src = '';
+    G('tplPv').classList.remove('active');
+    tplUp.style.display = '';
+    toast('已清除顶层模板');
+    imRefreshPreview(); imUpdateStart();
+  };
 
   // ----- 尺寸模式切换 -----
   G('modeSeg').querySelectorAll('button').forEach(btn=>{
