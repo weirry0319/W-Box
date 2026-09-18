@@ -82,7 +82,7 @@
   #tab-rename .mode-tabs input { display: none; }
   #tab-rename table {
     width: 100%; border-collapse: collapse; font-size: 13px;
-    max-height: 340px; overflow-y: auto; display: block;
+    flex: 1; min-height: 0; overflow-y: auto; display: block;
   }
   #tab-rename thead th {
     text-align: left; padding: 6px 10px; background: #f6f8fa;
@@ -102,12 +102,19 @@
   #tab-rename .tip.show { display: block; }
   #tab-rename .field { display: flex; align-items: center; gap: 6px; }
   #tab-rename #log {
-    margin-top: 8px; padding: 8px 10px; background: #0d1117; color: #c9d1d9;
+    margin-top: 4px; padding: 8px 10px; background: #0d1117; color: #c9d1d9;
     border-radius: 6px; font-family: Consolas, monospace; font-size: 11px;
-    flex: 1; min-height: 180px; overflow-y: auto; display: none; white-space: pre-wrap;
+    flex: 1; min-height: 0; overflow-y: auto; display: none; white-space: pre-wrap;
   }
   #tab-rename #log.show { display: block; }
   #tab-rename .hint { font-size: 12px; color: #8b949e; margin-top: 4px; }
+  #tab-rename .quick-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  #tab-rename .quick-tag {
+    padding: 4px 12px; border: 1px solid #d0d7de; border-radius: 14px;
+    background: #f6f8fa; cursor: pointer; font-size: 12px; color: #57606a;
+    transition: all .15s; font-family: inherit;
+  }
+  #tab-rename .quick-tag:hover { background: #0969da; color: #fff; border-color: #0969da; }
 
   /* ============================================================
      图片缩放工具样式（#tab-resize 作用域）
@@ -198,6 +205,13 @@
   #tab-resize .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; user-select: none; }
   #tab-resize .checkbox-row input { accent-color: var(--primary); width: 16px; height: 16px; }
   #tab-resize .hint { font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+  #tab-resize .quick-sizes { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  #tab-resize .quick-size {
+    padding: 4px 12px; border: 1px solid var(--border); border-radius: 14px;
+    background: #f8fafc; cursor: pointer; font-size: 12px; color: var(--text-2);
+    transition: all .15s; font-family: inherit;
+  }
+  #tab-resize .quick-size:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
   #tab-resize .divider { height: 1px; background: var(--border); margin: 20px 0; }
   #tab-resize .progress-wrap { margin-top: 20px; display: none; }
   #tab-resize .progress-wrap.active { display: block; }
@@ -248,12 +262,20 @@
 
       <div id="numberOptions">
         <div class="row">
-          <div class="field"><label>前缀</label><input type="text" id="prefix" placeholder="如：照片_"></div>
+          <div class="field"><label>前缀</label><input type="text" id="prefix" placeholder="如：主图"></div>
           <div class="field"><label>起始编号</label><input type="number" id="startNum" value="1" min="0" style="width:80px"></div>
           <div class="field"><label>编号位数</label><input type="number" id="digits" value="1" min="1" max="10" style="width:70px"></div>
           <div class="field"><label>后缀</label><input type="text" id="suffix" placeholder="如："></div>
         </div>
-        <div class="hint">示例：前缀空、起始 1、位数 1 → 主图22.jpg 变成 1.jpg、主图202.jpg 变成 2.jpg…</div>
+        <div class="quick-tags">
+          <span style="font-size:12px;color:#8b949e">快捷前缀：</span>
+          <button type="button" class="quick-tag" data-prefix="主图">主图</button>
+          <button type="button" class="quick-tag" data-prefix="详情页">详情页</button>
+          <button type="button" class="quick-tag" data-prefix="sku">sku</button>
+          <button type="button" class="quick-tag" data-prefix="视频">视频</button>
+          <button type="button" class="quick-tag" data-prefix="白底图">白底图</button>
+        </div>
+        <div class="hint">点上面标签快速填前缀；前缀空则直接 1.jpg、2.jpg…</div>
       </div>
 
       <div id="replaceOptions" style="display:none">
@@ -286,7 +308,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="flex:1; min-height:0; display:flex; flex-direction:column; margin-bottom:8px">
       <h2>3. 预览（原名 → 新名）</h2>
       <table>
         <thead><tr><th style="width:50%">原文件名</th><th>新文件名</th></tr></thead>
@@ -370,8 +392,14 @@
         </div>
         <div class="field" id="pixelFields">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label>宽度</label><div class="input-row"><input type="number" id="widthVal" value="800" min="1"><span class="unit">px</span></div></div>
-            <div><label>高度</label><div class="input-row"><input type="number" id="heightVal" value="600" min="1"><span class="unit">px</span></div></div>
+            <div><label>宽度</label><div class="input-row"><input type="number" id="widthVal" value="1440" min="1"><span class="unit">px</span></div></div>
+            <div><label>高度</label><div class="input-row"><input type="number" id="heightVal" value="1440" min="1"><span class="unit">px</span></div></div>
+          </div>
+          <div class="quick-sizes">
+            <span style="font-size:12px;color:var(--text-3)">快捷尺寸：</span>
+            <button type="button" class="quick-size" data-w="800" data-h="800">800×800</button>
+            <button type="button" class="quick-size" data-w="800" data-h="1200">800×1200</button>
+            <button type="button" class="quick-size" data-w="1440" data-h="1920">1440×1920</button>
           </div>
         </div>
         <div class="field" id="percentFields" style="display:none">
@@ -443,12 +471,61 @@ function log(msg, color) {
 }
 const C = { ok: '#3fb950', err: '#f85149', warn: '#d29922', info: '#58a6ff' };
 
+// ---------- IndexedDB 持久化文件夹句柄 ----------
+let dbPromise = null;
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open('rename-tool', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('handles');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+async function saveDirHandle(handle) {
+  try {
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').put(handle, 'lastDir');
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  } catch (e) { console.warn('保存文件夹句柄失败', e); }
+}
+async function loadDirHandle() {
+  try {
+    const db = await openDB();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readonly');
+      const req = tx.objectStore('handles').get('lastDir');
+      req.onsuccess = () => res(req.result || null);
+      req.onerror = () => rej(req.error);
+    });
+  } catch (e) { return null; }
+}
+async function ensurePermission(handle) {
+  // 先查权限
+  if (handle.queryPermission) {
+    const st = await handle.queryPermission({ mode: 'readwrite' });
+    if (st === 'granted') return true;
+    if (st === 'prompt') {
+      const rs = await handle.requestPermission({ mode: 'readwrite' });
+      return rs === 'granted';
+    }
+    return false;
+  }
+  return true; // 老浏览器直接放行
+}
+
 async function pickFolder() {
   if (!('showDirectoryPicker' in window)) {
     showTip('当前浏览器不支持此功能，请用 Chrome 或 Edge 打开本文件。'); return;
   }
   try {
     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    await ensurePermission(dirHandle);
+    await saveDirHandle(dirHandle);
     $('folderPath').textContent = dirHandle.name + ' （已授权读写）';
     lastUndo = [];
     log('已选择文件夹：' + dirHandle.name);
@@ -457,6 +534,21 @@ async function pickFolder() {
     if (e.name !== 'AbortError') log('选择文件夹出错：' + e.message, C.err);
   }
 }
+
+// 页面加载时自动恢复上次选的文件夹
+(async function restoreFolder() {
+  try {
+    const saved = await loadDirHandle();
+    if (!saved) return;
+    const ok = await ensurePermission(saved);
+    if (ok) {
+      dirHandle = saved;
+      $('folderPath').textContent = saved.name + ' （已自动恢复）';
+      log('已自动恢复上次文件夹：' + saved.name);
+      await refreshPreview();
+    }
+  } catch (e) { console.warn('恢复文件夹失败', e); }
+})();
 function toggleMode() {
   const mode = document.querySelector('input[name=renameMode]:checked').value;
   $('numberOptions').style.display = (mode === 'number') ? '' : 'none';
@@ -618,6 +710,12 @@ document.querySelectorAll('input[name=renameMode]').forEach(r => r.onchange = to
   $(id).addEventListener('input', () => { if (dirHandle) refreshPreview(); });
 });
 document.querySelectorAll('input[name=targetMode]').forEach(r => r.onchange = () => { if (dirHandle) refreshPreview(); });
+document.querySelectorAll('#tab-rename .quick-tag').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('prefix').value = btn.dataset.prefix;
+    if (dirHandle) refreshPreview();
+  });
+});
 document.addEventListener('keydown', (e) => {
   const tag = (document.activeElement && document.activeElement.tagName) || '';
   const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
@@ -658,6 +756,12 @@ document.addEventListener('keydown', (e) => {
     rs$('qualityField').style.display = (f==='jpeg'||f==='webp'||f==='original') ? 'block':'none';
   });
   rs$('qualityRange').addEventListener('input', e=>{ rs$('qualityVal').textContent = e.target.value; });
+  document.querySelectorAll('#tab-resize .quick-size').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      rs$('widthVal').value = btn.dataset.w;
+      rs$('heightVal').value = btn.dataset.h;
+    });
+  });
   rs$('dirInput').addEventListener('change', e=>{ handleFiles(e.target.files, true); e.target.value=''; });
   rs$('fileInput').addEventListener('change', e=>{ handleFiles(e.target.files, false); e.target.value=''; });
 
