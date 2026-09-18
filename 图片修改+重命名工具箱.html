@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片批量工具箱</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: #f4f5f7; color: #24292f; line-height: 1.5;
+    display: flex; flex-direction: column;
+  }
+
+  /* ===== 顶部 Tab 栏 ===== */
+  .app-tabs {
+    display: flex; gap: 8px; padding: 12px 24px;
+    background: #fff; border-bottom: 1px solid #e1e4e8;
+    position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+  }
+  .app-tab {
+    padding: 10px 24px; border: 1px solid #d0d7de; border-radius: 10px;
+    background: #f6f8fa; cursor: pointer; font-size: 14px; font-weight: 500;
+    color: #57606a; transition: all .15s;
+  }
+  .app-tab:hover { background: #eaeef2; }
+  .app-tab.active { background: #2ea043; color: #fff; border-color: #2ea043; }
+
+  section { display: none; flex: 1; min-height: 0; }
+  section.active { display: flex; flex-direction: column; }
+
+  /* ============================================================
+     重命名工具样式（#tab-rename 作用域）
+     ============================================================ */
+  #tab-rename .rn-container {
+    max-width: 960px; margin: 0 auto; width: 100%; flex: 1;
+    display: flex; flex-direction: column; min-height: 0; padding: 24px;
+  }
+  #tab-rename h1 { font-size: 22px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  #tab-rename h1 .dot { width: 10px; height: 10px; border-radius: 50%; background: #2ea043; }
+  #tab-rename .card {
+    background: #fff; border: 1px solid #e1e4e8; border-radius: 8px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  #tab-rename .card h2 {
+    font-size: 14px; color: #57606a; font-weight: 600;
+    margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  #tab-rename .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  #tab-rename .row + .row { margin-top: 10px; }
+  #tab-rename label { font-size: 13px; color: #57606a; }
+  #tab-rename input[type=text], #tab-rename input[type=number], #tab-rename select {
+    padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 6px;
+    font-size: 13px; background: #fff; min-width: 90px;
+  }
+  #tab-rename input:focus, #tab-rename select:focus { outline: none; border-color: #0969da; }
+  #tab-rename .folder-path {
+    flex: 1; padding: 6px 10px; background: #f6f8fa;
+    border: 1px dashed #d0d7de; border-radius: 6px;
+    font-size: 13px; color: #57606a; min-width: 200px; word-break: break-all;
+  }
+  #tab-rename button {
+    padding: 7px 16px; border: 1px solid #d0d7de; border-radius: 6px;
+    background: #f6f8fa; cursor: pointer; font-size: 13px; transition: all .15s;
+  }
+  #tab-rename button:hover { background: #eaeef2; }
+  #tab-rename button.primary { background: #2ea043; color: #fff; border-color: #2ea043; }
+  #tab-rename button.primary:hover { background: #2c974b; }
+  #tab-rename .radio-group, #tab-rename .check-group { display: flex; gap: 14px; align-items: center; font-size: 13px; }
+  #tab-rename .radio-group label, #tab-rename .check-group label { color: #24292f; cursor: pointer; }
+  #tab-rename .mode-tabs {
+    display: flex; gap: 0; border: 1px solid #d0d7de; border-radius: 6px;
+    overflow: hidden; margin-bottom: 12px; width: fit-content;
+  }
+  #tab-rename .mode-tabs label {
+    padding: 7px 18px; cursor: pointer; font-size: 13px; color: #57606a;
+    background: #f6f8fa; border-right: 1px solid #d0d7de; user-select: none;
+  }
+  #tab-rename .mode-tabs label:last-child { border-right: none; }
+  #tab-rename .mode-tabs label.active { background: #0969da; color: #fff; }
+  #tab-rename .mode-tabs input { display: none; }
+  #tab-rename table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    max-height: 340px; overflow-y: auto; display: block;
+  }
+  #tab-rename thead th {
+    text-align: left; padding: 6px 10px; background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de; position: sticky; top: 0;
+    font-weight: 600; color: #57606a;
+  }
+  #tab-rename tbody td { padding: 5px 10px; border-bottom: 1px solid #eaeef2; }
+  #tab-rename tr.warn td { color: #cf222e; background: #fff5f5; }
+  #tab-rename tr.ok td.new { color: #1a7f37; }
+  #tab-rename .actions { display: flex; gap: 10px; justify-content: flex-end; padding: 4px 0; }
+  #tab-rename #status { margin-top: 10px; font-size: 13px; color: #57606a; min-height: 20px; }
+  #tab-rename .tip {
+    margin-top: 14px; padding: 10px 14px; background: #fff8c5;
+    border: 1px solid #d4a72c; border-radius: 6px; font-size: 12px;
+    color: #594700; display: none;
+  }
+  #tab-rename .tip.show { display: block; }
+  #tab-rename .field { display: flex; align-items: center; gap: 6px; }
+  #tab-rename #log {
+    margin-top: 8px; padding: 8px 10px; background: #0d1117; color: #c9d1d9;
+    border-radius: 6px; font-family: Consolas, monospace; font-size: 11px;
+    flex: 1; min-height: 180px; overflow-y: auto; display: none; white-space: pre-wrap;
+  }
+  #tab-rename #log.show { display: block; }
+  #tab-rename .hint { font-size: 12px; color: #8b949e; margin-top: 4px; }
+
+  /* ============================================================
+     图片缩放工具样式（#tab-resize 作用域）
+     ============================================================ */
+  :root {
+    --primary:#10b981; --primary-dark:#059669; --primary-light:#d1fae5; --primary-50:#ecfdf5;
+    --bg:#f8fafc; --card:#ffffff; --text:#1e293b; --text-2:#64748b; --text-3:#94a3b8;
+    --border:#e2e8f0; --danger:#ef4444; --warn:#f59e0b; --radius:14px;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  }
+  #tab-resize {
+    padding: 24px; overflow-y: auto;
+  }
+  #tab-resize .wrap { max-width: 1200px; margin: 0 auto; }
+  #tab-resize .hero { text-align: center; margin-bottom: 24px; }
+  #tab-resize .hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -.5px; margin-bottom: 8px; }
+  #tab-resize .hero h1 span { color: var(--primary); }
+  #tab-resize .hero p { color: var(--text-2); font-size: 14px; max-width: 560px; margin: 0 auto; line-height: 1.7; }
+  #tab-resize .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  @media(max-width:900px){ #tab-resize .layout { grid-template-columns: 1fr; } }
+  #tab-resize .card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  #tab-resize .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 40px 32px; text-align: center; cursor: pointer;
+    transition: all .2s; background: var(--card);
+  }
+  #tab-resize .upload-zone:hover, #tab-resize .upload-zone.dragover {
+    border-color: var(--primary); background: var(--primary-50);
+  }
+  #tab-resize .upload-zone.dragover { border-style: solid; }
+  #tab-resize .upload-icon {
+    width: 64px; height: 64px; border-radius: 18px; background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+  }
+  #tab-resize .upload-icon svg { width: 34px; height: 34px; color: var(--primary); }
+  #tab-resize .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  #tab-resize .upload-zone p { color: var(--text-2); font-size: 13px; line-height: 1.7; }
+  #tab-resize .upload-zone .or { margin: 12px 0; color: var(--text-3); font-size: 13px; }
+  #tab-resize .btns-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  #tab-resize .btn {
+    padding: 9px 20px; border-radius: 10px; border: none; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .15s; font-family: inherit; display: inline-flex;
+    align-items: center; gap: 8px;
+  }
+  #tab-resize .btn-primary { background: var(--primary); color: #fff; }
+  #tab-resize .btn-primary:hover { background: var(--primary-dark); }
+  #tab-resize .btn-primary:disabled { background: var(--text-3); cursor: not-allowed; }
+  #tab-resize .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  #tab-resize .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+  #tab-resize .btn-danger { background: transparent; color: var(--danger); border: 1px solid #fecaca; }
+  #tab-resize .btn-danger:hover { background: #fef2f2; }
+  #tab-resize .btn svg { width: 16px; height: 16px; }
+  #tab-resize .file-section { margin-top: 20px; display: none; }
+  #tab-resize .file-section.active { display: block; }
+  #tab-resize .file-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  #tab-resize .file-header h3 { font-size: 15px; font-weight: 600; }
+  #tab-resize .file-header .count { color: var(--primary); font-weight: 700; }
+  #tab-resize .file-list { max-height: 420px; overflow-y: auto; }
+  #tab-resize .file-item { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+  #tab-resize .file-item:last-child { border-bottom: none; }
+  #tab-resize .file-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #f1f5f9; flex-shrink: 0; }
+  #tab-resize .file-info { flex: 1; min-width: 0; }
+  #tab-resize .file-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  #tab-resize .file-meta { color: var(--text-3); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+  #tab-resize .file-status { font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  #tab-resize .file-status.ok { color: var(--primary); }
+  #tab-resize .file-status.err { color: var(--danger); }
+  #tab-resize .file-status.pending { color: var(--text-3); }
+  #tab-resize .folder-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; background: var(--primary-50); color: var(--primary-dark); padding: 2px 8px; border-radius: 6px; margin-left: 6px; font-weight: 500; }
+  #tab-resize .panel { padding: 22px; }
+  #tab-resize .panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  #tab-resize .field { margin-bottom: 18px; }
+  #tab-resize .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-2); }
+  #tab-resize .seg { display: flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px; }
+  #tab-resize .seg button { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-2); transition: all .15s; font-family: inherit; }
+  #tab-resize .seg button.active { background: #fff; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  #tab-resize .input-row { display: flex; gap: 10px; align-items: center; }
+  #tab-resize .input-row .unit { color: var(--text-3); font-size: 13px; flex-shrink: 0; }
+  #tab-resize input[type=number], #tab-resize select {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: inherit; color: var(--text); background: #fff; outline: none;
+  }
+  #tab-resize input[type=number]:focus, #tab-resize select:focus { border-color: var(--primary); }
+  #tab-resize input[type=range] { width: 100%; accent-color: var(--primary); }
+  #tab-resize .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; user-select: none; }
+  #tab-resize .checkbox-row input { accent-color: var(--primary); width: 16px; height: 16px; }
+  #tab-resize .hint { font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+  #tab-resize .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  #tab-resize .progress-wrap { margin-top: 20px; display: none; }
+  #tab-resize .progress-wrap.active { display: block; }
+  #tab-resize .progress-bar { height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  #tab-resize .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #34d399); border-radius: 10px; transition: width .2s; width: 0; }
+  #tab-resize .progress-text { font-size: 13px; color: var(--text-2); display: flex; justify-content: space-between; }
+  #tab-resize .btn-lg { padding: 14px 36px; font-size: 15px; border-radius: 12px; }
+  #tab-resize .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1e293b; color: #fff; padding: 12px 24px; border-radius: 10px;
+    font-size: 14px; opacity: 0; transition: all .3s; z-index: 200; pointer-events: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  }
+  #tab-resize .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- 顶部 Tab 栏 -->
+<nav class="app-tabs">
+  <button class="app-tab active" data-tab="rename">📝 批量重命名</button>
+  <button class="app-tab" data-tab="resize">🖼️ 批量改图片尺寸</button>
+</nav>
+
+<!-- ========== 重命名工具 ========== -->
+<section id="tab-rename" class="active">
+  <div class="rn-container">
+    <h1><span class="dot"></span>批量重命名工具</h1>
+
+    <div class="card">
+      <h2>1. 选择目标文件夹</h2>
+      <div class="row">
+        <button id="pickBtn">选择文件夹…</button>
+        <span class="folder-path" id="folderPath">未选择（点上方按钮选择）</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. 设置命名规则</h2>
+      <div class="mode-tabs">
+        <label id="tabNumber" class="active">
+          <input type="radio" name="renameMode" value="number" checked> 编号命名
+        </label>
+        <label id="tabReplace">
+          <input type="radio" name="renameMode" value="replace"> 查找替换 / 删除
+        </label>
+      </div>
+
+      <div id="numberOptions">
+        <div class="row">
+          <div class="field"><label>前缀</label><input type="text" id="prefix" placeholder="如：照片_"></div>
+          <div class="field"><label>起始编号</label><input type="number" id="startNum" value="1" min="0" style="width:80px"></div>
+          <div class="field"><label>编号位数</label><input type="number" id="digits" value="1" min="1" max="10" style="width:70px"></div>
+          <div class="field"><label>后缀</label><input type="text" id="suffix" placeholder="如："></div>
+        </div>
+        <div class="hint">示例：前缀空、起始 1、位数 1 → 主图22.jpg 变成 1.jpg、主图202.jpg 变成 2.jpg…</div>
+      </div>
+
+      <div id="replaceOptions" style="display:none">
+        <div class="row">
+          <div class="field"><label>查找内容</label><input type="text" id="findText" placeholder="如：-"></div>
+          <div class="field"><label>替换为</label><input type="text" id="replaceText" placeholder="留空 = 删除"></div>
+          <label class="check-group"><input type="checkbox" id="caseSensitive" checked> 区分大小写</label>
+        </div>
+        <div class="hint">示例：查找「-」替换为「+」→ 文件-01.jpg 变成 文件+01.jpg；替换为留空 → 文件01.jpg</div>
+      </div>
+
+      <div class="row">
+        <div class="radio-group">
+          <label><input type="radio" name="targetMode" value="both" checked> 文件和文件夹</label>
+          <label><input type="radio" name="targetMode" value="file"> 仅文件</label>
+          <label><input type="radio" name="targetMode" value="dir"> 仅文件夹</label>
+        </div>
+        <label class="check-group"><input type="checkbox" id="keepExt" checked> 保留原扩展名</label>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>排序依据</label>
+          <select id="sortBy">
+            <option value="name_asc">按名称 A→Z</option>
+            <option value="name_desc">按名称 Z→A</option>
+            <option value="mtime_desc">按修改时间 新→旧</option>
+            <option value="mtime_asc">按修改时间 旧→新</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. 预览（原名 → 新名）</h2>
+      <table>
+        <thead><tr><th style="width:50%">原文件名</th><th>新文件名</th></tr></thead>
+        <tbody id="previewBody">
+          <tr><td colspan="2" style="color:#8b949e;text-align:center;padding:20px">暂无预览</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <span style="font-size:12px;color:#8b949e;align-self:center">
+        快捷键：回车=执行 &nbsp; Backspace=撤销 &nbsp; / （、）=刷新预览
+      </span>
+      <button id="refreshBtn">刷新预览</button>
+      <button id="undoBtn">撤销上次</button>
+      <button id="applyBtn" class="primary">执行重命名</button>
+    </div>
+    <div id="status"></div>
+    <div id="log"></div>
+    <div class="tip" id="tip"></div>
+  </div>
+</section>
+
+<!-- ========== 图片缩放工具 ========== -->
+<section id="tab-resize">
+  <div class="wrap">
+    <div class="hero">
+      <h1>批量修改图片<span>尺寸</span></h1>
+      <p>选择文件夹或拖入照片，统一调整尺寸后打包下载。全程在浏览器本地完成，图片不上传服务器。</p>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="upload-zone" id="dropZone">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              <path d="M12 11v6M9 14l3-3 3 3"/>
+            </svg>
+          </div>
+          <h3>拖入文件夹或照片到这里</h3>
+          <p>支持拖入文件夹（自动递归子目录）或直接拖入照片<br>可多次拖入，照片会追加到列表中</p>
+          <div class="or">— 或者 —</div>
+          <div class="btns-row">
+            <button class="btn btn-primary" onclick="document.getElementById('dirInput').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              选择父文件夹
+            </button>
+            <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">选择单个/多个文件</button>
+          </div>
+        </div>
+        <input type="file" id="dirInput" webkitdirectory multiple hidden>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+
+        <div class="card file-section" id="fileSection">
+          <div class="file-header">
+            <h3>已加载 <span class="count" id="fileCount">0</span> 张图片</h3>
+            <button class="btn btn-danger" onclick="rsClearFiles()">清空列表</button>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+
+        <div class="progress-wrap card" id="progressWrap" style="padding:20px">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-text">
+            <span id="progressLabel">准备中…</span>
+            <span id="progressPct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel" id="settingsPanel">
+        <h3 style="margin-bottom:16px">⚙️ 缩放设置</h3>
+        <div class="field">
+          <label>缩放模式</label>
+          <div class="seg" id="modeSeg">
+            <button data-mode="pixel" class="active">按像素</button>
+            <button data-mode="percent">按百分比</button>
+            <button data-mode="longest">按最长边</button>
+          </div>
+        </div>
+        <div class="field" id="pixelFields">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label>宽度</label><div class="input-row"><input type="number" id="widthVal" value="800" min="1"><span class="unit">px</span></div></div>
+            <div><label>高度</label><div class="input-row"><input type="number" id="heightVal" value="600" min="1"><span class="unit">px</span></div></div>
+          </div>
+        </div>
+        <div class="field" id="percentFields" style="display:none">
+          <label>缩放比例</label>
+          <div class="input-row"><input type="number" id="percentVal" value="50" min="1" max="500"><span class="unit">%</span></div>
+          <div class="hint">例如 50 表示缩小到原尺寸的一半</div>
+        </div>
+        <div class="field" id="longestFields" style="display:none">
+          <label>最长边尺寸</label>
+          <div class="input-row"><input type="number" id="longestVal" value="1920" min="1"><span class="unit">px</span></div>
+          <div class="hint">自动保持宽高比，将最长边限制为指定像素</div>
+        </div>
+        <div class="field">
+          <label class="checkbox-row">
+            <input type="checkbox" id="keepRatio" checked>
+            保持宽高比（仅按像素模式生效）
+          </label>
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label>输出格式</label>
+          <select id="formatSel">
+            <option value="original">保持原格式</option>
+            <option value="jpeg">JPEG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="field" id="qualityField">
+          <label>图片质量：<span id="qualityVal">85</span>%</label>
+          <input type="range" id="qualityRange" min="10" max="100" value="85">
+          <div class="hint">仅对 JPEG / WebP 格式生效</div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" id="startBtn" onclick="rsStartProcessing()" disabled>开始批量处理</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;display:none" id="downloadBtn" onclick="rsDownloadZip()">下载 ZIP（保持目录结构）</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+// ===== 顶部 Tab 切换 =====
+document.querySelectorAll('.app-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-rename').classList.toggle('active', tab.dataset.tab === 'rename');
+    document.getElementById('tab-resize').classList.toggle('active', tab.dataset.tab === 'resize');
+  });
+});
+</script>
+
+<script>
+// ===== 重命名工具 =====
+let dirHandle = null;
+let lastUndo = [];
+const $ = id => document.getElementById(id);
+function setStatus(m) { $('status').textContent = m; }
+function showTip(m) { const t=$('tip'); t.textContent=m; t.classList.add('show'); }
+function log(msg, color) {
+  const el = $('log'); el.classList.add('show');
+  const line = document.createElement('div');
+  line.style.color = color || '#c9d1d9';
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  el.appendChild(line); el.scrollTop = el.scrollHeight; console.log(msg);
+}
+const C = { ok: '#3fb950', err: '#f85149', warn: '#d29922', info: '#58a6ff' };
+
+async function pickFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    showTip('当前浏览器不支持此功能，请用 Chrome 或 Edge 打开本文件。'); return;
+  }
+  try {
+    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    $('folderPath').textContent = dirHandle.name + ' （已授权读写）';
+    lastUndo = [];
+    log('已选择文件夹：' + dirHandle.name);
+    await refreshPreview();
+  } catch (e) {
+    if (e.name !== 'AbortError') log('选择文件夹出错：' + e.message, C.err);
+  }
+}
+function toggleMode() {
+  const mode = document.querySelector('input[name=renameMode]:checked').value;
+  $('numberOptions').style.display = (mode === 'number') ? '' : 'none';
+  $('replaceOptions').style.display = (mode === 'replace') ? '' : 'none';
+  $('tabNumber').classList.toggle('active', mode === 'number');
+  $('tabReplace').classList.toggle('active', mode === 'replace');
+  if (dirHandle) refreshPreview();
+}
+async function collectItems() {
+  if (!dirHandle) return [];
+  const mode = document.querySelector('input[name=targetMode]:checked').value;
+  const items = [];
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind === 'file' && (mode === 'file' || mode === 'both')) items.push({ name: entry.name, type: 'file' });
+    else if (entry.kind === 'directory' && (mode === 'dir' || mode === 'both')) items.push({ name: entry.name, type: 'directory' });
+  }
+  const sb = $('sortBy').value;
+  if (sb === 'name_asc') items.sort((a,b) => a.name.localeCompare(b.name, 'zh'));
+  else if (sb === 'name_desc') items.sort((a,b) => b.name.localeCompare(a.name, 'zh'));
+  return items;
+}
+function sanitize(n) { return n.replace(/[\\/:*?"<>|]/g, '_').replace(/^\s+|\s+$/g, ''); }
+function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function buildNewName(item, index) {
+  const renameMode = document.querySelector('input[name=renameMode]:checked').value;
+  const keepExt = $('keepExt').checked;
+  let base = item.name, ext = '';
+  if (item.type === 'file' && keepExt) {
+    const dot = base.lastIndexOf('.');
+    if (dot > 0) { ext = base.slice(dot); base = base.slice(0, dot); }
+  }
+  if (renameMode === 'replace') {
+    const findText = $('findText').value, replaceText = $('replaceText').value;
+    if (!findText) return sanitize(item.name);
+    let result;
+    if ($('caseSensitive').checked) result = base.split(findText).join(replaceText);
+    else result = base.replace(new RegExp(escapeRegExp(findText), 'gi'), replaceText);
+    return sanitize(result + ext);
+  } else {
+    const prefix = $('prefix').value, suffix = $('suffix').value;
+    const start = parseInt($('startNum').value || '1', 10);
+    const digits = Math.max(1, parseInt($('digits').value || '1', 10));
+    const num = String(start + index).padStart(digits, '0');
+    return sanitize(`${prefix}${num}${suffix}${ext}`);
+  }
+}
+async function refreshPreview() {
+  const body = $('previewBody'); body.innerHTML = '';
+  if (!dirHandle) {
+    body.innerHTML = '<tr><td colspan="2" style="color:#8b949e;text-align:center;padding:20px">请先选择文件夹</td></tr>';
+    setStatus(''); return;
+  }
+  const items = await collectItems();
+  if (items.length === 0) {
+    body.innerHTML = '<tr><td colspan="2" style="color:#8b949e;text-align:center;padding:20px">该目录下没有符合条件的项</td></tr>';
+    setStatus(''); return;
+  }
+  const plan = items.map((it, i) => ({ oldName: it.name, newName: buildNewName(it, i), type: it.type }));
+  const seen = new Set();
+  for (const p of plan) {
+    p.conflict = false; p.reason = '';
+    if (p.newName.toLowerCase() !== p.oldName.toLowerCase()) {
+      try {
+        if (p.type === 'file') await dirHandle.getFileHandle(p.newName);
+        else await dirHandle.getDirectoryHandle(p.newName);
+        p.conflict = true; p.reason = '目标已存在';
+      } catch (e) {}
+    }
+    const key = p.newName.toLowerCase();
+    if (seen.has(key)) { p.conflict = true; p.reason = '批次内重名'; }
+    seen.add(key);
+  }
+  let nConflict = 0, nChanged = 0;
+  for (const p of plan) {
+    const tr = document.createElement('tr');
+    if (p.conflict) tr.className = 'warn';
+    const td1 = document.createElement('td'); td1.textContent = p.oldName;
+    const td2 = document.createElement('td'); td2.className = 'new';
+    td2.textContent = p.conflict ? `${p.newName}  ⚠ ${p.reason}` : p.newName;
+    tr.appendChild(td1); tr.appendChild(td2); body.appendChild(tr);
+    if (p.conflict) nConflict++;
+    if (p.oldName !== p.newName) nChanged++;
+  }
+  setStatus(`共 ${plan.length} 项，其中 ${nChanged} 项需要改名，${nConflict} 项有冲突（红色，将被跳过）`);
+  return plan;
+}
+async function copyDirectory(src, dst) {
+  for await (const entry of src.values()) {
+    if (entry.kind === 'file') {
+      const file = await entry.getFile();
+      const buf = await file.arrayBuffer();
+      const newFh = await dst.getFileHandle(entry.name, { create: true });
+      const w = await newFh.createWritable();
+      await w.write(buf); await w.close();
+    } else {
+      const newDir = await dst.getDirectoryHandle(entry.name, { create: true });
+      await copyDirectory(entry, newDir);
+    }
+  }
+}
+async function renameOne(oldName, newName, type) {
+  if (type === 'file') {
+    const oldFh = await dirHandle.getFileHandle(oldName);
+    const file = await oldFh.getFile();
+    const buf = await file.arrayBuffer();
+    const newFh = await dirHandle.getFileHandle(newName, { create: true });
+    const w = await newFh.createWritable();
+    try { await w.write(buf); } finally { await w.close(); }
+    await dirHandle.removeEntry(oldName);
+  } else {
+    const oldDir = await dirHandle.getDirectoryHandle(oldName);
+    const newDir = await dirHandle.getDirectoryHandle(newName, { create: true });
+    await copyDirectory(oldDir, newDir);
+    await dirHandle.removeEntry(oldName, { recursive: true });
+  }
+}
+async function apply() {
+  const plan = await refreshPreview();
+  if (!plan || plan.length === 0) return;
+  const conflicts = plan.filter(p => p.conflict);
+  if (conflicts.length > 0) log(`⚠ 有 ${conflicts.length} 项存在冲突，将自动跳过：${conflicts.map(p=>p.oldName).join('、')}`, C.warn);
+  let done = 0, skipped = 0; const errors = [];
+  for (const p of plan) {
+    if (p.conflict) { skipped++; continue; }
+    if (p.oldName === p.newName) { done++; continue; }
+    try {
+      log(`处理：${p.oldName}  →  ${p.newName}`, C.info);
+      await renameOne(p.oldName, p.newName, p.type);
+      lastUndo.push({ oldName: p.newName, newName: p.oldName, type: p.type });
+      done++;
+    } catch (e) {
+      const msg = `${p.oldName}: ${e.name} - ${e.message}`;
+      log('失败: ' + msg, C.err); errors.push(msg);
+    }
+  }
+  if (errors.length) log(`✗ 完成：成功 ${done} 项，跳过 ${skipped} 项，出错 ${errors.length} 项`, C.err);
+  else log(`✓ 完成：成功 ${done} 项，跳过 ${skipped} 项。可点「撤销上次」回滚。`, C.ok);
+  await refreshPreview();
+}
+async function undo() {
+  if (lastUndo.length === 0) { log('没有可撤销的操作。', C.warn); return; }
+  let done = 0, failed = 0;
+  for (let i = lastUndo.length - 1; i >= 0; i--) {
+    const u = lastUndo[i];
+    try {
+      log(`撤销：${u.oldName}  →  ${u.newName}`, C.info);
+      await renameOne(u.oldName, u.newName, u.type); done++;
+    } catch (e) { failed++; log('撤销失败 ' + u.oldName + ': ' + e.message, C.err); }
+  }
+  lastUndo = []; await refreshPreview();
+  log(`✓ 已撤销 ${done} 项，失败 ${failed} 项。`, failed ? C.err : C.ok);
+}
+$('pickBtn').onclick = pickFolder;
+$('refreshBtn').onclick = refreshPreview;
+$('applyBtn').onclick = apply;
+$('undoBtn').onclick = undo;
+document.querySelectorAll('input[name=renameMode]').forEach(r => r.onchange = toggleMode);
+['prefix','suffix','startNum','digits','keepExt','sortBy','findText','replaceText','caseSensitive'].forEach(id => {
+  $(id).addEventListener('input', () => { if (dirHandle) refreshPreview(); });
+});
+document.querySelectorAll('input[name=targetMode]').forEach(r => r.onchange = () => { if (dirHandle) refreshPreview(); });
+document.addEventListener('keydown', (e) => {
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  if (typing) return;
+  if (e.key === 'Enter') { e.preventDefault(); log('快捷键：执行重命名（Enter）', C.info); apply(); }
+  else if (e.key === 'Backspace') { e.preventDefault(); log('快捷键：撤销（Backspace）', C.info); undo(); }
+  else if (e.key === '/' || e.key === '\\' || e.key === '、') { e.preventDefault(); refreshPreview(); }
+});
+</script>
+
+<script>
+// ===== 图片缩放工具（IIFE 隔离，避免和重命名工具的 $ 函数冲突）=====
+(function(){
+  let rsFiles = [];
+  let rsMode = 'pixel';
+  let processedZip = null;
+  const rs$ = id => document.getElementById(id);
+  const IMG_RE = /\.(jpe?g|png|webp|bmp|gif)$/i;
+
+  function toast(msg){
+    const t = rs$('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer); t._timer = setTimeout(()=>t.classList.remove('show'), 2500);
+  }
+
+  rs$('modeSeg').querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      rs$('modeSeg').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      rsMode = btn.dataset.mode;
+      rs$('pixelFields').style.display = rsMode==='pixel'?'block':'none';
+      rs$('percentFields').style.display = rsMode==='percent'?'block':'none';
+      rs$('longestFields').style.display = rsMode==='longest'?'block':'none';
+      rs$('keepRatio').parentElement.style.display = rsMode==='pixel'?'flex':'none';
+    });
+  });
+  rs$('formatSel').addEventListener('change', e=>{
+    const f = e.target.value;
+    rs$('qualityField').style.display = (f==='jpeg'||f==='webp'||f==='original') ? 'block':'none';
+  });
+  rs$('qualityRange').addEventListener('input', e=>{ rs$('qualityVal').textContent = e.target.value; });
+  rs$('dirInput').addEventListener('change', e=>{ handleFiles(e.target.files, true); e.target.value=''; });
+  rs$('fileInput').addEventListener('change', e=>{ handleFiles(e.target.files, false); e.target.value=''; });
+
+  const dz = rs$('dropZone'), fileSec = rs$('fileSection');
+  function setupDrop(el){
+    el.addEventListener('dragenter', e=>{ e.preventDefault(); e.stopPropagation(); el.classList.add('dragover'); });
+    el.addEventListener('dragover', e=>{ e.preventDefault(); e.stopPropagation(); el.classList.add('dragover'); });
+    el.addEventListener('dragleave', e=>{ e.preventDefault(); e.stopPropagation(); el.classList.remove('dragover'); });
+    el.addEventListener('drop', e=>{ e.preventDefault(); e.stopPropagation(); el.classList.remove('dragover'); handleDrop(e.dataTransfer); });
+  }
+  function handleDrop(dt){
+    if(!dt){ toast('未检测到数据'); return; }
+    const directFiles = [];
+    if(dt.files){ for(let i=0;i<dt.files.length;i++) directFiles.push(dt.files[i]); }
+    let canUseEntries = false;
+    if(dt.items && dt.items.length > 0){ try { canUseEntries = !!dt.items[0].webkitGetAsEntry; } catch(err){ canUseEntries = false; } }
+    if(canUseEntries){
+      const entries = [];
+      for(let i=0;i<dt.items.length;i++){
+        try { const entry = dt.items[i].webkitGetAsEntry(); if(entry) entries.push(entry); } catch(err){}
+      }
+      if(entries.length > 0){
+        const allFiles = []; let pending = entries.length;
+        entries.forEach(entry=>{
+          walkEntry(entry, '', allFiles, ()=>{
+            pending--;
+            if(pending===0){
+              if(allFiles.length > 0) handleFileList(allFiles, true);
+              else if(directFiles.length > 0) handleFiles(directFiles, false);
+              else toast('未找到图片文件');
+            }
+          });
+        });
+        return;
+      }
+    }
+    if(directFiles.length > 0) handleFiles(directFiles, false);
+    else toast('未找到图片文件');
+  }
+  setupDrop(dz); setupDrop(fileSec);
+  dz.addEventListener('click', e=>{ if(e.target.closest('.btn')) return; rs$('dirInput').click(); });
+
+  function walkEntry(entry, path, out, done){
+    if(entry.isFile){
+      entry.file(f=>{ f.relativePath = path ? path+'/'+f.name : f.name; out.push(f); done(); },
+        ()=>{ done(); });
+    } else if(entry.isDirectory){
+      const reader = entry.createReader();
+      const dirPath = path ? path+'/'+entry.name : entry.name;
+      const readBatch = ()=>{
+        reader.readEntries(batch=>{
+          if(batch.length===0){ done(); return; }
+          let p = batch.length;
+          batch.forEach(en=>{ walkEntry(en, dirPath, out, ()=>{ p--; if(p===0) readBatch(); }); });
+        }, ()=>{ done(); });
+      };
+      readBatch();
+    } else done();
+  }
+  function handleFiles(fileList, fromDir){
+    const arr = [];
+    for(const f of fileList){
+      if(IMG_RE.test(f.name)){
+        if(!f.relativePath) f.relativePath = fromDir ? (f.webkitRelativePath || f.name) : f.name;
+        arr.push(f);
+      }
+    }
+    handleFileList(arr, fromDir);
+  }
+  async function handleFileList(arr, fromDir){
+    if(arr.length===0){ toast('未找到图片文件'); return; }
+    const existing = new Set(rsFiles.map(f=>f.relativePath));
+    let added = 0;
+    for(const f of arr){
+      if(existing.has(f.relativePath)) continue;
+      existing.add(f.relativePath);
+      rsFiles.push({ file:f, relativePath:f.relativePath, name:f.name, size:f.size, type:f.type, status:'pending' });
+      added++;
+    }
+    if(added===0){ toast('这些图片已在列表中'); return; }
+    renderFileList();
+    rs$('fileSection').classList.add('active');
+    rs$('startBtn').disabled = false;
+    rs$('downloadBtn').style.display = 'none';
+    rs$('progressWrap').classList.remove('active');
+    toast(`已追加 ${added} 张，共 ${rsFiles.length} 张`);
+    rsFiles.forEach(item=>{ if(!item.thumb) genThumb(item); });
+  }
+  function genThumb(item){
+    const url = URL.createObjectURL(item.file);
+    const img = new Image();
+    img.onload = ()=>{ item.width = img.naturalWidth; item.height = img.naturalHeight; item.thumb = url; renderFileList(); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+  window.rsClearFiles = function(){
+    rsFiles.forEach(f=>{ if(f.thumb) URL.revokeObjectURL(f.thumb); });
+    rsFiles = []; processedZip = null;
+    renderFileList();
+    rs$('fileSection').classList.remove('active');
+    rs$('startBtn').disabled = true;
+    rs$('downloadBtn').style.display = 'none';
+    rs$('progressWrap').classList.remove('active');
+    toast('已清空');
+  };
+  function renderFileList(){
+    rs$('fileCount').textContent = rsFiles.length;
+    const list = rs$('fileList');
+    if(rsFiles.length===0){ list.innerHTML=''; return; }
+    list.innerHTML = rsFiles.slice(0,100).map(item=>{
+      const pathParts = item.relativePath.split('/');
+      const folder = pathParts.length>1 ? pathParts.slice(0,-1).join('/') : '';
+      const dims = item.width ? `${item.width}×${item.height}` : '加载中';
+      const sizeKB = (item.size/1024).toFixed(1);
+      const statusMap = {pending:'待处理', ok:'已完成', err:'失败'};
+      return `<div class="file-item">
+        <img class="file-thumb" src="${item.thumb||''}" style="${item.thumb?'':'opacity:.3'}">
+        <div class="file-info">
+          <div class="file-name" title="${item.relativePath}">${item.name}
+            ${folder?`<span class="folder-badge">${folder}</span>`:''}
+          </div>
+          <div class="file-meta"><span>${dims}</span><span>${sizeKB} KB</span></div>
+        </div>
+        <div class="file-status ${item.status}">${statusMap[item.status]}</div>
+      </div>`;
+    }).join('') + (rsFiles.length>100 ? `<div class="file-item" style="justify-content:center;color:var(--text-3);font-size:12px">… 以及另外 ${rsFiles.length-100} 张</div>`:'');
+  }
+  function calcDims(item, settings){
+    const ow = item.width, oh = item.height;
+    if(!ow||!oh) return null;
+    let nw, nh;
+    if(settings.mode==='percent'){ const r = settings.percent/100; nw = Math.round(ow*r); nh = Math.round(oh*r); }
+    else if(settings.mode==='longest'){
+      const L = settings.longest;
+      if(ow>=oh){ nw=L; nh=Math.round(oh*L/ow); } else { nh=L; nw=Math.round(ow*L/oh); }
+    } else {
+      nw = settings.width; nh = settings.height;
+      if(settings.keepRatio){ nw = settings.width; nh = Math.round(oh*nw/ow); }
+    }
+    return { nw:Math.max(1,nw), nh:Math.max(1,nh) };
+  }
+  function resizeOne(item, settings){
+    return new Promise((resolve,reject)=>{
+      const img = new Image();
+      const url = URL.createObjectURL(item.file);
+      img.onload = ()=>{
+        const dims = calcDims({width:img.naturalWidth, height:img.naturalHeight}, settings);
+        if(!dims){ URL.revokeObjectURL(url); reject(new Error('无法读取尺寸')); return; }
+        const canvas = document.createElement('canvas');
+        canvas.width = dims.nw; canvas.height = dims.nh;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, dims.nw, dims.nh);
+        URL.revokeObjectURL(url);
+        let outType = settings.format;
+        if(outType==='original') outType = item.type || 'image/jpeg';
+        if(outType==='image/gif') outType = 'image/png';
+        const mime = 'image/'+outType.replace('image/','');
+        canvas.toBlob(blob=>{ if(blob) resolve({blob, outType:mime, dims}); else reject(new Error('编码失败')); }, mime, settings.quality/100);
+      };
+      img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('图片加载失败')); };
+      img.src = url;
+    });
+  }
+  window.rsStartProcessing = async function(){
+    if(rsFiles.length===0){ toast('请先选择图片'); return; }
+    const settings = {
+      mode: rsMode,
+      width: parseInt(rs$('widthVal').value)||800,
+      height: parseInt(rs$('heightVal').value)||600,
+      percent: parseInt(rs$('percentVal').value)||50,
+      longest: parseInt(rs$('longestVal').value)||1920,
+      keepRatio: rs$('keepRatio').checked,
+      format: rs$('formatSel').value,
+      quality: parseInt(rs$('qualityRange').value)
+    };
+    rs$('progressWrap').classList.add('active');
+    rs$('startBtn').disabled = true;
+    rs$('downloadBtn').style.display = 'none';
+    const zip = new JSZip();
+    let okCount = 0, errCount = 0;
+    const total = rsFiles.length;
+    for(let i=0;i<total;i++){
+      const item = rsFiles[i]; item.status = 'pending';
+      try {
+        const {blob, outType} = await resizeOne(item, settings);
+        let rel = item.relativePath;
+        if(settings.format!=='original'){
+          const extMap = {'jpeg':'jpg','png':'png','webp':'webp'};
+          const ext = extMap[settings.format] || settings.format;
+          rel = rel.replace(/\.[^.]+$/, '.'+ext);
+        }
+        zip.file(rel, blob); item.status = 'ok'; okCount++;
+      } catch(e){ item.status = 'err'; errCount++; }
+      const pct = Math.round((i+1)/total*100);
+      rs$('progressFill').style.width = pct+'%';
+      rs$('progressPct').textContent = pct+'%';
+      rs$('progressLabel').textContent = `处理中 ${i+1}/${total} — ${item.name}`;
+      renderFileList();
+      await new Promise(r=>setTimeout(r,0));
+    }
+    rs$('progressLabel').textContent = `完成：成功 ${okCount} 张` + (errCount?`，失败 ${errCount} 张`:'');
+    processedZip = await zip.generateAsync({type:'blob'});
+    rs$('downloadBtn').style.display = 'inline-flex';
+    rs$('startBtn').disabled = false;
+    toast(`处理完成！成功 ${okCount} 张`);
+  };
+  window.rsDownloadZip = function(){
+    if(!processedZip){ toast('请先处理图片'); return; }
+    const url = URL.createObjectURL(processedZip);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    a.href = url; a.download = `resized-images-${ts}.zip`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  };
+})();
+</script>
+</body>
+</html>
