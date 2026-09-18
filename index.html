@@ -583,8 +583,8 @@ section.active{display:flex}
           <h3>拖入文件夹或底层图片</h3>
           <p>支持递归子目录 · 可多次拖入追加</p>
           <div class="btns">
-            <button class="im-btn primary" onclick="event.stopPropagation();document.getElementById('im-dirInput').click()">
-              选择文件夹
+            <button class="im-btn primary" onclick="event.stopPropagation();imPickFolderRW()">
+              选择文件夹（可覆盖写回）
             </button>
             <button class="im-btn ghost" onclick="event.stopPropagation();document.getElementById('im-fileInput').click()">选择多文件</button>
           </div>
@@ -704,6 +704,16 @@ section.active{display:flex}
           <!-- 输出 -->
           <div class="grp">
             <div class="grp-title"><span class="dot"></span>输出</div>
+            <div class="fld">
+              <label>导出方式</label>
+              <div class="seg" id="im-emodeSeg">
+                <button data-emode="zip" class="active">ZIP 打包下载</button>
+                <button data-emode="overwrite">原路径覆盖</button>
+              </div>
+              <div class="hint" id="im-overwriteHint" style="display:none;margin-top:6px">
+                通过"选择文件夹"导入时，处理结果将直接写回原文件夹；处理完仍可点"下载 ZIP"保存备份。
+              </div>
+            </div>
             <div class="fld">
               <label>格式</label>
               <select id="im-format">
@@ -1008,6 +1018,8 @@ document.addEventListener('keydown', (e) => {
   let imZip = null;
   let imFolderName = '';
   let imSelectedIdx = 0;
+  let imExportMode = 'zip';       // 'zip' | 'overwrite'
+  let imRootDirHandle = null;     // 可写根目录句柄（通过 showDirectoryPicker 获得）
   const G = id => document.getElementById('im-'+id);
   const IMG_RE = /\.(jpe?g|png|webp|bmp|gif)$/i;
 
@@ -1119,9 +1131,81 @@ document.addEventListener('keydown', (e) => {
   });
   G('quality').addEventListener('input', e=>{ G('qualityVal').textContent=e.target.value; });
 
+  // ----- 导出方式切换 -----
+  G('emodeSeg').querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      G('emodeSeg').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      imExportMode = btn.dataset.emode;
+      const isOw = imExportMode === 'overwrite';
+      G('overwriteHint').style.display = isOw ? 'block' : 'none';
+      G('dlBtn').style.visibility = 'hidden';
+      imUpdateStart();
+    });
+  });
+
+  // 递归写入文件到可写目录（覆盖模式用）
+  async function imWriteToPath(dirHandle, relPath, blob){
+    const parts = relPath.split('/').filter(Boolean);
+    let cur = dirHandle;
+    for(let i=0; i<parts.length-1; i++){
+      cur = await cur.getDirectoryHandle(parts[i], { create: true });
+    }
+    const fh = await cur.getFileHandle(parts[parts.length-1], { create: true });
+    const w = await fh.createWritable();
+    await w.write(blob);
+    await w.close();
+  }
+
   // ----- 文件选择 -----
-  G('dirInput').addEventListener('change', e=>{ imHandleFiles(e.target.files, true); e.target.value=''; });
-  G('fileInput').addEventListener('change', e=>{ imHandleFiles(e.target.files, false); e.target.value=''; });
+  G('fileInput').addEventListener('change', e=>{ imHandleFiles(e.target.files, false, false); e.target.value=''; });
+
+  // 可写文件夹选择（showDirectoryPicker）—— 支持原路径覆盖
+  window.imPickFolderRW = async function(){
+    if(!('showDirectoryPicker' in window)){
+      toast('当前浏览器不支持，请使用 Chrome / Edge'); return;
+    }
+    try{
+      const dirHandle = await window.showDirectoryPicker({ mode:'readwrite' });
+      let st = await dirHandle.queryPermission({ mode:'readwrite' });
+      if(st !== 'granted'){
+        st = await dirHandle.requestPermission({ mode:'readwrite' });
+        if(st !== 'granted'){ toast('未获得文件夹读写权限'); return; }
+      }
+      const collected = [];
+      await imWalkDirHandleRW(dirHandle, '', collected, dirHandle);
+      if(collected.length === 0){ toast('该文件夹下没有图片文件'); return; }
+      imRootDirHandle = dirHandle;
+      // 直接用所选文件夹名作为 ZIP 导出名
+      imFolderName = dirHandle.name;
+      imAddCollected(collected, true);
+    }catch(e){
+      if(e.name !== 'AbortError') toast('选择文件夹失败：' + e.message);
+    }
+  };
+
+  async function imWalkDirHandleRW(dirHandle, path, out, rootHandle){
+    for await (const entry of dirHandle.values()){
+      if(entry.kind === 'file'){
+        if(IMG_RE.test(entry.name)){
+          const file = await entry.getFile();
+          file.relativePath = path ? path + '/' + entry.name : entry.name;
+          out.push({
+            file: file,
+            relativePath: file.relativePath,
+            name: entry.name,
+            size: file.size,
+            type: file.type,
+            writable: true,
+            dirHandle: rootHandle,
+            status: 'pending'
+          });
+        }
+      } else if(entry.kind === 'directory'){
+        await imWalkDirHandleRW(entry, path ? path + '/' + entry.name : entry.name, out, rootHandle);
+      }
+    }
+  }
 
   const dz = G('dropZone'), fileSec = G('fileSec');
   function setupDrop(el){
@@ -1151,8 +1235,8 @@ document.addEventListener('keydown', (e) => {
           imWalkEntry(en,'',all,()=>{
             pending--;
             if(pending===0){
-              if(all.length>0) imHandleFiles(all, true);
-              else if(direct.length>0) imHandleFiles(direct, false);
+              if(all.length>0) imHandleFiles(all, true, false);
+              else if(direct.length>0) imHandleFiles(direct, false, false);
               else toast('未找到图片文件');
             }
           });
@@ -1160,11 +1244,11 @@ document.addEventListener('keydown', (e) => {
         return;
       }
     }
-    if(direct.length>0) imHandleFiles(direct, false);
+    if(direct.length>0) imHandleFiles(direct, false, false);
     else toast('未找到图片文件');
   }
   setupDrop(dz); setupDrop(fileSec);
-  dz.addEventListener('click', e=>{ if(e.target.closest('.im-btn')) return; G('dirInput').click(); });
+  dz.addEventListener('click', e=>{ if(e.target.closest('.im-btn')) return; imPickFolderRW(); });
 
   function imWalkEntry(entry, path, out, done){
     if(entry.isFile){
@@ -1183,7 +1267,7 @@ document.addEventListener('keydown', (e) => {
     } else done();
   }
 
-  function imHandleFiles(fileList, fromDir){
+  function imHandleFiles(fileList, fromDir, writable){
     const arr = [];
     for(const f of fileList){
       if(IMG_RE.test(f.name)){
@@ -1192,18 +1276,26 @@ document.addEventListener('keydown', (e) => {
       }
     }
     if(arr.length===0){ toast('未找到图片文件'); return; }
+    const collected = arr.map(f => ({
+      file: f, relativePath: f.relativePath, name: f.name,
+      size: f.size, type: f.type, writable: !!writable, status: 'pending'
+    }));
+    imAddCollected(collected, fromDir);
+  }
+
+  function imAddCollected(collected, fromDir){
     const existing = new Set(imFiles.map(f=>f.relativePath));
     let added = 0;
-    for(const f of arr){
-      if(existing.has(f.relativePath)) continue;
-      existing.add(f.relativePath);
-      imFiles.push({file:f, relativePath:f.relativePath, name:f.name, size:f.size, type:f.type, status:'pending'});
+    for(const item of collected){
+      if(existing.has(item.relativePath)) continue;
+      existing.add(item.relativePath);
+      imFiles.push(item);
       added++;
     }
     if(added===0){ toast('这些图片已在列表中'); return; }
     // 提取顶层文件夹名（用于导出文件名）
-    if(!imFolderName && arr[0] && arr[0].relativePath){
-      const rp = arr[0].relativePath;
+    if(!imFolderName && collected[0] && collected[0].relativePath){
+      const rp = collected[0].relativePath;
       const slash = rp.indexOf('/');
       imFolderName = slash > 0 ? rp.slice(0, slash) : '图片';
     }
@@ -1212,7 +1304,7 @@ document.addEventListener('keydown', (e) => {
     G('pvCard').style.display = 'block';
     setStep(2);
     imUpdateStart();
-    toast(`已追加 ${added} 张，共 ${imFiles.length} 张`);
+    toast(`已追加 ${added} 张，共 ${imFiles.length} 张` + (collected[0] && collected[0].writable ? '（可写回原路径）' : ''));
     imFiles.forEach(item=>{ if(!item.thumb) imGenThumb(item); });
   }
 
@@ -1230,6 +1322,7 @@ document.addEventListener('keydown', (e) => {
   window.imClearFiles = function(){
     imFiles.forEach(f=>{ if(f.thumb) URL.revokeObjectURL(f.thumb); });
     imFiles = []; imZip = null; imFolderName = '';
+    imRootDirHandle = null;
     imRenderList();
     G('fileSec').classList.remove('active');
     G('pvCard').style.display = 'none';
@@ -1270,7 +1363,11 @@ document.addEventListener('keydown', (e) => {
   };
 
   function imUpdateStart(){
-    const can = imFiles.length>0 && (imResizeOn || imTpl);
+    let can = imFiles.length>0 && (imResizeOn || imTpl);
+    if(imExportMode === 'overwrite'){
+      // 覆盖模式：每个文件都必须是通过"选择文件夹"导入的（有自己的可写句柄）
+      can = can && imFiles.every(f => f.writable && f.dirHandle);
+    }
     G('startBtn').disabled = !can;
   }
 
@@ -1388,6 +1485,8 @@ document.addEventListener('keydown', (e) => {
   window.imStart = async function(){
     if(imFiles.length===0){ toast('请先导入图片'); return; }
     if(!imResizeOn && !imTpl){ toast('请开启尺寸调整或上传顶层模板'); return; }
+    const isOw = imExportMode === 'overwrite';
+    if(isOw && !imFiles.every(f=>f.writable && f.dirHandle)){ toast('覆盖模式仅支持通过"选择文件夹"按钮导入的图片，请用该按钮重新导入'); return; }
     const format = G('format').value;
     const quality = parseInt(G('quality').value)/100;
     G('progWrap').classList.add('active');
@@ -1411,6 +1510,10 @@ document.addEventListener('keydown', (e) => {
           const extMap = {'jpeg':'jpg','png':'png','webp':'webp'};
           rel = rel.replace(/\.[^.]+$/, '.'+(extMap[format]||format));
         }
+        // 覆盖模式：同时写回原文件夹 + 加入 zip（供下载备份）
+        if(isOw && item.dirHandle){
+          await imWriteToPath(item.dirHandle, rel, blob);
+        }
         zip.file(rel, blob);
         item.status='ok'; ok++;
       }catch(e){ item.status='err'; err++; console.error(e); }
@@ -1421,11 +1524,17 @@ document.addEventListener('keydown', (e) => {
       imRenderList();
       await new Promise(r=>setTimeout(r,0));
     }
-    G('progLabel').textContent = `完成：成功 ${ok} 张`+(err?`，失败 ${err} 张`:'');
+    // 两种模式都生成 ZIP 供下载
     imZip = await zip.generateAsync({type:'blob'});
     G('dlBtn').style.visibility = 'visible';
+    if(isOw){
+      G('progLabel').textContent = `完成：已写回原文件夹 ${ok} 张，ZIP 已就绪可下载`+(err?`，失败 ${err} 张`:'');
+      toast(`已覆盖原文件夹 ${ok} 张，也可点"下载 ZIP"备份`);
+    } else {
+      G('progLabel').textContent = `完成：成功 ${ok} 张`+(err?`，失败 ${err} 张`:'');
+      toast(`处理完成！成功 ${ok} 张`);
+    }
     G('startBtn').disabled = false;
-    toast(`处理完成！成功 ${ok} 张`);
   };
 
   window.imDownload = function(){
