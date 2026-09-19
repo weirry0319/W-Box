@@ -12,6 +12,15 @@ html,body{height:100%}
   --p:#10b981; --p-dark:#059669; --p-light:#d1fae5; --p-50:#ecfdf5;
   --c-card:#fff; --c-text:#1e293b; --c-2:#64748b; --c-3:#94a3b8;
   --c-border:#e2e8f0; --c-bg:#f4f6f8; --c-danger:#ef4444;
+  --c-hover:#f8fafc; --c-hover2:#f1f5f9; --c-input:#fff;
+  --c-warn-bg:#fffbeb; --c-warn-bd:#fde68a; --c-warn-tx:#92400e;
+}
+body.dark{
+  --p:#34d399; --p-dark:#6ee7b7; --p-light:#064e3b; --p-50:#064e3b;
+  --c-card:#1e293b; --c-text:#e2e8f0; --c-2:#94a3b8; --c-3:#64748b;
+  --c-border:#334155; --c-bg:#0f172a; --c-danger:#f87171;
+  --c-hover:#1e293b; --c-hover2:#334155; --c-input:#0f172a;
+  --c-warn-bg:#422006; --c-warn-bd:#92400e; --c-warn-tx:#fbbf24;
 }
 body{
   font-family:'Noto Sans SC',-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
@@ -22,15 +31,15 @@ body{
 /* ===== 顶部 Tab 栏 ===== */
 .app-tabs{
   display:flex; gap:10px; padding:12px 24px;
-  background:#fff; border-bottom:1px solid var(--c-border);
+  background:var(--c-card); border-bottom:1px solid var(--c-border);
   position:sticky; top:0; z-index:100; flex-shrink:0; align-items:center;
 }
 .app-tab{
   padding:9px 22px; border:1px solid var(--c-border); border-radius:10px;
-  background:#f8fafc; cursor:pointer; font-size:14px; font-weight:500;
+  background:var(--c-hover); cursor:pointer; font-size:14px; font-weight:500;
   color:var(--c-2); transition:all .15s; font-family:inherit;
 }
-.app-tab:hover{background:#f1f5f9; color:var(--c-text)}
+.app-tab:hover{background:var(--c-hover2); color:var(--c-text)}
 .app-tab.active{background:var(--p); color:#fff; border-color:var(--p); box-shadow:0 2px 8px rgba(16,185,129,.3)}
 .app-brand{font-size:17px; font-weight:700; margin-right:18px; letter-spacing:-.3px}
 .app-brand span{color:var(--p)}
@@ -53,7 +62,7 @@ section.active{display:flex}
 #tab-rename h1 .dot{width:10px; height:10px; border-radius:50%; background:var(--p); box-shadow:0 0 0 4px var(--p-light)}
 #tab-rename .rn-sub{font-size:13px; color:var(--c-2); margin:-6px 0 10px 20px}
 #tab-rename .card{
-  background:#fff; border:1px solid var(--c-border); border-radius:12px;
+  background:var(--c-card); border:1px solid var(--c-border); border-radius:12px;
   padding:18px 20px;
 }
 #tab-rename .card h2{
@@ -71,28 +80,28 @@ section.active{display:flex}
 #tab-rename label{font-size:13px; color:var(--c-2); font-weight:500}
 #tab-rename input[type=text], #tab-rename input[type=number], #tab-rename select{
   padding:8px 12px; border:1px solid var(--c-border); border-radius:8px;
-  font-size:14px; background:#fff; min-width:100px; font-family:inherit; color:var(--c-text);
+  font-size:14px; background:var(--c-card); min-width:100px; font-family:inherit; color:var(--c-text);
   transition:border-color .15s;
 }
 #tab-rename input:focus, #tab-rename select:focus{outline:none; border-color:var(--p); box-shadow:0 0 0 3px var(--p-light)}
 #tab-rename .folder-path{
-  flex:1; padding:8px 14px; background:#f8fafc;
+  flex:1; padding:8px 14px; background:var(--c-hover);
   border:1px dashed var(--c-border); border-radius:8px;
   font-size:13px; color:var(--c-2); min-width:200px; word-break:break-all;
 }
 #tab-rename button{
   padding:9px 18px; border:1px solid var(--c-border); border-radius:8px;
-  background:#f8fafc; cursor:pointer; font-size:13px; font-weight:500;
+  background:var(--c-hover); cursor:pointer; font-size:13px; font-weight:500;
   transition:all .15s; font-family:inherit; color:var(--c-text);
 }
-#tab-rename button:hover{background:#f1f5f9; border-color:var(--c-3)}
+#tab-rename button:hover{background:var(--c-hover2); border-color:var(--c-3)}
 #tab-rename button.primary{background:var(--p); color:#fff; border-color:var(--p)}
 #tab-rename button.primary:hover{background:var(--p-dark); box-shadow:0 2px 8px rgba(16,185,129,.3)}
 #tab-rename .radio-group, #tab-rename .check-group{display:flex; gap:16px; align-items:center; font-size:13px; flex-wrap:wrap}
 #tab-rename .radio-group label, #tab-rename .check-group label{color:var(--c-text); cursor:pointer; font-weight:400; display:flex; align-items:center; gap:5px}
 #tab-rename .radio-group input, #tab-rename .check-group input{accent-color:var(--p); width:14px; height:14px; cursor:pointer}
 #tab-rename .mode-tabs{
-  display:flex; gap:2px; background:#f1f5f9; border-radius:8px;
+  display:flex; gap:2px; background:var(--c-hover2); border-radius:8px;
   padding:3px; margin-bottom:14px; width:fit-content;
 }
 #tab-rename .mode-tabs label{
@@ -101,42 +110,41 @@ section.active{display:flex}
   transition:all .15s; font-weight:500;
 }
 #tab-rename .mode-tabs label:hover{color:var(--c-text)}
-#tab-rename .mode-tabs label.active{background:#fff; color:var(--p); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+#tab-rename .mode-tabs label.active{background:var(--c-card); color:var(--p); box-shadow:0 1px 3px rgba(0,0,0,.08)}
 #tab-rename .mode-tabs input{display:none}
 #tab-rename table{
   width:100%; border-collapse:separate; border-spacing:0; font-size:13px;
   flex:1; min-height:0; overflow-y:auto; display:block;
 }
 #tab-rename thead th{
-  text-align:left; padding:10px 14px; background:#f8fafc;
+  text-align:left; padding:10px 14px; background:var(--c-hover);
   border-bottom:1px solid var(--c-border); position:sticky; top:0;
   font-weight:600; color:var(--c-2); font-size:12px; text-transform:uppercase; letter-spacing:.3px;
 }
 #tab-rename tbody td{padding:8px 14px; border-bottom:1px solid #f1f5f9}
-#tab-rename tbody tr:hover{background:#f8fafc}
+#tab-rename tbody tr:hover{background:var(--c-hover)}
 #tab-rename tr.warn td{color:var(--c-danger); background:#fef2f2}
 #tab-rename tr.warn td:first-child{border-radius:6px 0 0 6px}
 #tab-rename tr.warn td:last-child{border-radius:0 6px 6px 0}
-#tab-rename .actions{display:flex; gap:10px; justify-content:flex-end; align-items:center; padding:4px 0}
+#tab-rename .actions{display:flex; gap:10px; justify-content:flex-end; align-items:center; padding:12px 20px; background:var(--c-card); border:1px solid var(--c-border); border-radius:0 0 12px 12px; margin-top:-15px}
 #tab-rename #status{margin-top:4px; font-size:13px; color:var(--c-2); min-height:20px}
 #tab-rename .tip{
-  margin-top:8px; padding:12px 16px; background:#fffbeb;
-  border:1px solid #fde68a; border-radius:8px; font-size:12px;
-  color:#92400e; display:none;
+  margin-top:8px; padding:12px 16px; background:var(--c-warn-bg);
+  border:1px solid var(--c-warn-bd); border-radius:8px; font-size:12px;
+  color:var(--c-warn-tx); display:none;
 }
 #tab-rename .tip.show{display:block}
 #tab-rename .field{display:flex; align-items:center; gap:8px}
 #tab-rename #log{
-  margin-top:4px; padding:12px 14px; background:#1e293b; color:#e2e8f0;
+  margin-top:0; padding:12px 14px; background:#1e293b; color:#e2e8f0;
   border-radius:8px; font-family:Consolas,monospace; font-size:12px;
-  flex:1; min-height:0; overflow-y:auto; display:none; white-space:pre-wrap;
+  flex:1; min-height:80px; overflow-y:auto; white-space:pre-wrap;
 }
-#tab-rename #log.show{display:block}
 #tab-rename .hint{font-size:12px; color:var(--c-3); margin-top:6px}
 #tab-rename .quick-tags{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:10px}
 #tab-rename .quick-tag{
   padding:5px 12px; border:1px solid var(--c-border); border-radius:14px;
-  background:#f8fafc; cursor:pointer; font-size:12px; color:var(--c-2);
+  background:var(--c-hover); cursor:pointer; font-size:12px; color:var(--c-2);
   transition:all .15s; font-family:inherit;
 }
 #tab-rename .quick-tag:hover{background:var(--p); color:#fff; border-color:var(--p)}
@@ -180,6 +188,22 @@ section.active{display:flex}
   body{overflow:auto}
   #tab-image{overflow:auto}
 }
+@media(max-width:600px){
+  .app-tabs{padding:8px 12px; gap:6px; flex-wrap:wrap}
+  .app-brand{font-size:15px; margin-right:8px}
+  .app-tab{padding:7px 14px; font-size:13px}
+  .app-badge{display:none}
+  #themeToggle{padding:4px 10px; font-size:12px}
+  #tab-image .im-grid{gap:10px}
+  #tab-image .im-col{gap:10px}
+  #tab-image .im-card{padding:10px 12px}
+  #tab-image .abtns{flex-wrap:wrap; gap:6px}
+  #tab-image .im-btn.lg{padding:10px 18px; font-size:13px; width:100%}
+  #tab-image .file-list{max-height:40vh}
+  #tab-image .pv-box{min-height:180px}
+  #tab-rename .rn-container{padding:12px}
+  #tab-rename .rn-container h1{font-size:17px}
+}
 #tab-image .im-col{display:flex; flex-direction:column; min-height:0; gap:16px}
 
 #tab-image .im-card{
@@ -197,7 +221,7 @@ section.active{display:flex}
 /* 顶层模板 */
 #tab-image .tpl-up{
   border:2px dashed var(--c-border); border-radius:12px;
-  padding:26px 16px; text-align:center; cursor:pointer; transition:all .15s; background:#fff;
+  padding:26px 16px; text-align:center; cursor:pointer; transition:all .15s; background:var(--c-card);
 }
 #tab-image .tpl-up:hover, #tab-image .tpl-up.dragover{border-color:var(--p); background:var(--p-50)}
 #tab-image .tpl-up .ico{
@@ -232,13 +256,13 @@ section.active{display:flex}
   display:inline-flex; align-items:center; gap:3px; font-size:10px;
   padding:3px 8px; border-radius:6px; font-weight:600;
 }
-#tab-image .badge.top{background:#fef3c7; color:#92400e}
+#tab-image .badge.top{background:#fef3c7; color:var(--c-warn-tx)}
 
 /* 底层上传区 */
 #tab-image .im-up{
   border:2px dashed var(--c-border); border-radius:12px;
   padding:32px 20px; text-align:center; cursor:pointer;
-  transition:all .15s; background:#fff; flex-shrink:0;
+  transition:all .15s; background:var(--c-card); flex-shrink:0;
 }
 #tab-image .im-up:hover, #tab-image .im-up.dragover{border-color:var(--p); background:var(--p-50)}
 #tab-image .im-up .ico{
@@ -258,24 +282,26 @@ section.active{display:flex}
 #tab-image .im-btn.primary{background:var(--p); color:#fff}
 #tab-image .im-btn.primary:hover{background:var(--p-dark)}
 #tab-image .im-btn.primary:disabled{background:var(--c-3); cursor:not-allowed}
-#tab-image .im-btn.ghost{background:#fff; color:var(--c-text); border:1px solid var(--c-border)}
+#tab-image .im-btn.ghost{background:var(--c-card); color:var(--c-text); border:1px solid var(--c-border)}
 #tab-image .im-btn.ghost:hover{border-color:var(--p); color:var(--p)}
 #tab-image .im-btn.danger{background:transparent; color:var(--c-danger); border:1px solid #fecaca}
 #tab-image .im-btn.danger:hover{background:#fef2f2}
+#tab-image .im-btn:disabled{opacity:.5; cursor:not-allowed; pointer-events:none}
 
 /* 文件列表 */
-#tab-image .file-sec{flex:1; min-height:0; display:none; flex-direction:column}
-#tab-image .file-sec.active{display:flex}
+#tab-image .file-sec{flex:1; min-height:0; display:flex; flex-direction:column}
 #tab-image .file-list{flex:1; overflow-y:auto; min-height:0}
 #tab-image .fi{
   display:flex; align-items:center; gap:12px; padding:11px 16px;
   border-bottom:1px solid #f1f5f9; font-size:13px;
 }
 #tab-image .fi:last-child{border-bottom:none}
-#tab-image .fi:hover{background:#f8fafc}
+#tab-image .fi:hover{background:var(--c-hover)}
 #tab-image .fi.selected{background:var(--p-50); border-left:3px solid var(--p); padding-left:13px}
 #tab-image .fi.selected .fi-name{color:var(--p-dark)}
-#tab-image .fi-thumb{width:46px; height:46px; border-radius:8px; object-fit:cover; background:#f1f5f9; flex-shrink:0}
+#tab-image .fi.processing{background:#e0f2fe !important; border-left:3px solid #0ea5e9 !important; padding-left:13px !important}
+#tab-image .fi.processing .fi-name{color:#0369a1}
+#tab-image .fi-thumb{width:46px; height:46px; border-radius:8px; object-fit:cover; background:var(--c-hover2); flex-shrink:0}
 #tab-image .fi-info{flex:1; min-width:0}
 #tab-image .fi-name{font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; font-size:13px}
 #tab-image .fi-meta{color:var(--c-3); font-size:12px; display:flex; gap:10px; flex-wrap:wrap}
@@ -302,19 +328,19 @@ section.active{display:flex}
 #tab-image .grp-title .dot{width:6px; height:6px; border-radius:50%; background:var(--p)}
 #tab-image .fld{margin-bottom:10px}
 #tab-image .fld label{display:block; font-size:13px; font-weight:500; margin-bottom:5px; color:var(--c-2)}
-#tab-image .seg{display:flex; background:#f1f5f9; border-radius:8px; padding:3px; gap:2px}
+#tab-image .seg{display:flex; background:var(--c-hover2); border-radius:8px; padding:3px; gap:2px}
 #tab-image .seg button{
   flex:1; padding:7px 4px; border:none; background:transparent; border-radius:6px;
   font-size:12px; font-weight:500; cursor:pointer; color:var(--c-2);
   transition:all .15s; font-family:inherit;
 }
 #tab-image .seg button:hover{color:var(--c-text)}
-#tab-image .seg button.active{background:#fff; color:var(--p); box-shadow:0 1px 2px rgba(0,0,0,.08)}
+#tab-image .seg button.active{background:var(--c-card); color:var(--p); box-shadow:0 1px 2px rgba(0,0,0,.08)}
 #tab-image .in-row{display:flex; gap:6px; align-items:center}
 #tab-image .in-row .unit{color:var(--c-3); font-size:12px; flex-shrink:0}
 #tab-image input[type=number], #tab-image select{
   width:100%; padding:8px 10px; border:1px solid var(--c-border); border-radius:8px;
-  font-size:13px; font-family:inherit; color:var(--c-text); background:#fff; outline:none;
+  font-size:13px; font-family:inherit; color:var(--c-text); background:var(--c-card); outline:none;
   transition:border-color .15s;
 }
 #tab-image input[type=number]:focus, #tab-image select:focus{border-color:var(--p); box-shadow:0 0 0 3px var(--p-light)}
@@ -326,7 +352,7 @@ section.active{display:flex}
 /* 对齐网格 */
 #tab-image .align-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:4px}
 #tab-image .abtn{
-  aspect-ratio:1.3; border:1px solid var(--c-border); background:#fff; border-radius:6px;
+  aspect-ratio:1.3; border:1px solid var(--c-border); background:var(--c-card); border-radius:6px;
   cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s;
 }
 #tab-image .abtn:hover{border-color:var(--p)}
@@ -345,14 +371,14 @@ section.active{display:flex}
   cursor:pointer; transition:all .2s; flex-shrink:0;
 }
 #tab-image .sw.on{background:var(--p)}
-#tab-image .sw::after{content:''; position:absolute; top:2px; left:2px; width:17px; height:17px; background:#fff; border-radius:50%; transition:all .2s; box-shadow:0 1px 2px rgba(0,0,0,.15)}
+#tab-image .sw::after{content:''; position:absolute; top:2px; left:2px; width:17px; height:17px; background:var(--c-card); border-radius:50%; transition:all .2s; box-shadow:0 1px 2px rgba(0,0,0,.15)}
 #tab-image .sw.on::after{left:19px}
 
 /* 快捷尺寸 */
 #tab-image .quick{display:flex; gap:5px; flex-wrap:wrap; margin-top:8px}
 #tab-image .quick button{
   padding:5px 11px; border:1px solid var(--c-border); border-radius:12px;
-  background:#f8fafc; cursor:pointer; font-size:12px; color:var(--c-2); font-family:inherit;
+  background:var(--c-hover); cursor:pointer; font-size:12px; color:var(--c-2); font-family:inherit;
   transition:all .15s;
 }
 #tab-image .quick button:hover{background:var(--p); color:#fff; border-color:var(--p)}
@@ -372,6 +398,16 @@ section.active{display:flex}
   min-height:100px; max-height:320px; overflow:auto;
 }
 #tab-image .pv-box canvas{max-width:100%; max-height:300px; display:block; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,.12)}
+body.dark #tab-image .pv-box{
+  background:
+    linear-gradient(45deg,#334155 25%,transparent 25%),
+    linear-gradient(-45deg,#334155 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#334155 75%),
+    linear-gradient(-45deg,transparent 75%,#334155 75%);
+  background-size:14px 14px; background-position:0 0,0 7px,7px -7px,-7px 0;
+  background-color:#1e293b;
+}
+body.dark #tab-image .tpl-pv .box{background-color:#1e293b;}
 #tab-image .pv-empty{color:var(--c-3); font-size:12px; text-align:center; padding:16px}
 #tab-image .pv-label{font-size:12px; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:5px}
 #tab-image .pv-label .dot{width:6px; height:6px; border-radius:50%; background:var(--p)}
@@ -386,7 +422,7 @@ section.active{display:flex}
 /* 底部操作栏 */
 #tab-image .action-bar{
   flex-shrink:0; padding:12px 18px;
-  background:#fff; border:1px solid var(--c-border); border-radius:12px;
+  background:var(--c-card); border:1px solid var(--c-border); border-radius:12px;
   display:flex; align-items:center; gap:14px;
 }
 #tab-image .prog-mini{flex:1; display:none}
@@ -396,6 +432,12 @@ section.active{display:flex}
 #tab-image .prog-text{font-size:11px; color:var(--c-2); display:flex; justify-content:space-between}
 #tab-image .abtns{display:flex; gap:10px; flex-shrink:0; margin-left:auto}
 #tab-image .im-btn.lg{padding:11px 28px; font-size:13px; border-radius:10px}
+#tab-image .im-log{
+  flex:1; min-height:100px; margin-top:12px;
+  padding:12px 14px; background:#1e293b; color:#e2e8f0;
+  border-radius:8px; font-family:Consolas,monospace; font-size:12px;
+  overflow-y:auto; white-space:pre-wrap;
+}
 
 /* Toast */
 .toast{
@@ -419,6 +461,7 @@ section.active{display:flex}
   <div class="app-brand">图片<span>工具箱</span></div>
   <button class="app-tab active" data-tab="image">🖼️ 图片处理</button>
   <button class="app-tab" data-tab="rename">📝 批量重命名</button>
+  <button id="themeToggle" title="切换深色/浅色模式" style="margin-left:auto;background:var(--c-hover);border:1px solid var(--c-border);border-radius:20px;padding:5px 14px;cursor:pointer;font-size:13px;color:var(--c-2)">🌙 深色</button>
   <div class="app-badge">本地处理 · 不上传服务器</div>
 </nav>
 
@@ -495,14 +538,16 @@ section.active{display:flex}
       </div>
     </div>
 
-    <div class="card" style="flex:1; min-height:0; display:flex; flex-direction:column">
+    <div class="card" style="flex:0 1 280px; min-height:180px; max-height:350px; display:flex; flex-direction:column; border-radius:12px 12px 0 0; border-bottom:none">
       <h2 data-step="3">预览（原名 → 新名）</h2>
+      <div style="flex:1; overflow:auto">
       <table>
         <thead><tr><th style="width:50%">原文件名</th><th>新文件名</th></tr></thead>
         <tbody id="previewBody">
           <tr><td colspan="2" style="color:var(--c-3);text-align:center;padding:24px">暂无预览</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <div class="actions">
@@ -563,7 +608,7 @@ section.active{display:flex}
             <div class="tpl-pv" id="im-tplPv">
               <div class="box"><img id="im-tplPvImg" alt="顶层预览"></div>
               <div class="info">
-                <div>
+                <div style="flex:1;min-width:0">
                   <div class="name" id="im-tplName">template.png</div>
                   <div id="im-tplDims" style="color:var(--c-3);font-size:10px">-- × --</div>
                 </div>
@@ -594,6 +639,7 @@ section.active{display:flex}
         </div>
         <input type="file" id="im-dirInput" webkitdirectory multiple hidden>
         <input type="file" id="im-fileInput" accept="image/*,.zip" multiple hidden>
+        <div class="im-log" id="im-log"></div>
       </div>
 
       <!-- 中列：文件列表 + 预览 -->
@@ -606,7 +652,7 @@ section.active{display:flex}
           <div class="file-list" id="im-fileList"></div>
         </div>
 
-        <div class="im-card pv-card" id="im-pvCard" style="display:none">
+        <div class="im-card pv-card" id="im-pvCard">
           <div class="pv-label"><span class="dot"></span>实时预览（第一张 · 含所有设置）</div>
           <div class="pv-box" id="im-pvBox"></div>
         </div>
@@ -718,6 +764,17 @@ section.active{display:flex}
             </div>
           </div>
 
+          <!-- 处理控制 -->
+          <div class="grp">
+            <div class="grp-title"><span class="dot"></span>处理控制</div>
+            <div class="fld">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <button class="im-btn ghost" id="im-pauseBtn" onclick="imPauseToggle()" disabled>暂停</button>
+                <button class="im-btn danger" id="im-cancelBtn" onclick="imCancelRun()" disabled>取消</button>
+              </div>
+            </div>
+          </div>
+
           <!-- 输出 -->
           <div class="grp">
             <div class="grp-title"><span class="dot"></span>输出</div>
@@ -777,6 +834,18 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
     document.getElementById('tab-image').classList.toggle('active', tab.dataset.tab==='image');
   });
 });
+// 深色模式切换
+(function(){
+  const btn = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('im-theme');
+  if(saved === 'dark'){ document.body.classList.add('dark'); btn.textContent = '☀️ 浅色'; }
+  btn.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark');
+    const dark = document.body.classList.contains('dark');
+    btn.textContent = dark ? '☀️ 浅色' : '🌙 深色';
+    localStorage.setItem('im-theme', dark ? 'dark' : 'light');
+  });
+})();
 </script>
 
 <script>
@@ -794,6 +863,7 @@ function log(msg, color) {
   el.appendChild(line); el.scrollTop = el.scrollHeight; console.log(msg);
 }
 const C = { ok:'#34d399', err:'#f87171', warn:'#fbbf24', info:'#60a5fa' };
+log('日志台已就绪，请先选择文件夹…', C.info);
 
 let dbPromise = null;
 function openDB() {
@@ -1037,8 +1107,23 @@ document.addEventListener('keydown', (e) => {
   let imSelectedIdx = 0;
   let imExportMode = 'zip';       // 'zip' | 'overwrite'
   let imRootDirHandle = null;     // 可写根目录句柄（通过 showDirectoryPicker 获得）
+  const PAGE_SIZE = 100;          // 列表分页大小
+  let imRenderedCount = 0;        // 已渲染的行数
+  let imRunning = false;          // 是否正在批量处理
+  let imPaused = false;           // 是否已暂停
+  let imCancelled = false;        // 是否已取消
+  let imPauseWaiters = [];        // 暂停时挂起的恢复函数列表
   const G = id => document.getElementById('im-'+id);
   const IMG_RE = /\.(jpe?g|png|webp|bmp|gif)$/i;
+  const LC = {ok:'#34d399', err:'#f87171', warn:'#fbbf24', info:'#60a5fa'};
+  function imLog(msg, color){
+    const el = G('log');
+    const line = document.createElement('div');
+    line.style.color = color || '#c9d1d9';
+    line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+    el.appendChild(line); el.scrollTop = el.scrollHeight;
+  }
+  imLog('日志台已就绪，等待导入图片…', LC.info);
 
   function toast(msg){
     const t = document.getElementById('toast');
@@ -1207,17 +1292,38 @@ document.addEventListener('keydown', (e) => {
       toast('当前浏览器不支持，请使用 Chrome / Edge'); return;
     }
     try{
-      const dirHandle = await window.showDirectoryPicker({ mode:'readwrite' });
+      // 读取上次保存的文件夹句柄，让弹窗直接定位到上次目录
+      let startIn;
+      try{
+        const db = await openDB();
+        startIn = await new Promise((res, rej) => {
+          const tx = db.transaction('handles', 'readonly');
+          const req = tx.objectStore('handles').get('lastDirImage');
+          req.onsuccess = () => res(req.result || null);
+          req.onerror = () => rej(req.error);
+        });
+      }catch(e){}
+      const opts = { mode:'readwrite' };
+      if(startIn) opts.startIn = startIn;
+      const dirHandle = await window.showDirectoryPicker(opts);
       let st = await dirHandle.queryPermission({ mode:'readwrite' });
       if(st !== 'granted'){
         st = await dirHandle.requestPermission({ mode:'readwrite' });
         if(st !== 'granted'){ toast('未获得文件夹读写权限'); return; }
       }
+      // 保存句柄到 IndexedDB，下次打开自动定位
+      try{
+        const db = await openDB();
+        await new Promise((res, rej) => {
+          const tx = db.transaction('handles', 'readwrite');
+          tx.objectStore('handles').put(dirHandle, 'lastDirImage');
+          tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+        });
+      }catch(e){ console.warn('保存句柄失败', e); }
       const collected = [];
       await imWalkDirHandleRW(dirHandle, '', collected, dirHandle);
       if(collected.length === 0){ toast('该文件夹下没有图片文件'); return; }
       imRootDirHandle = dirHandle;
-      // 直接用所选文件夹名作为 ZIP 导出名
       imFolderName = dirHandle.name;
       imAddCollected(collected, true);
     }catch(e){
@@ -1372,23 +1478,55 @@ document.addEventListener('keydown', (e) => {
       imFolderName = slash > 0 ? rp.slice(0, slash) : '图片';
     }
     imRenderList();
-    G('fileSec').classList.add('active');
-    G('pvCard').style.display = 'block';
     setStep(2);
     imUpdateStart();
+    imLog(`导入完成：新增 ${added} 张，共 ${imFiles.length} 张`, LC.ok);
     toast(`已追加 ${added} 张，共 ${imFiles.length} 张` + (collected[0] && collected[0].writable ? '（可写回原路径）' : ''));
-    imFiles.forEach(item=>{ if(!item.thumb) imGenThumb(item); });
+    // 只给当前可见批次生成缩略图，其余懒加载
+    imEnsureThumbs(0, Math.min(PAGE_SIZE, imFiles.length));
   }
 
-  function imGenThumb(item){
-    const url = URL.createObjectURL(item.file);
-    const img = new Image();
-    img.onload = ()=>{
-      item.width = img.naturalWidth; item.height = img.naturalHeight;
-      item.thumb = url; imRenderList(); imRefreshPreview();
-    };
-    img.onerror = ()=>URL.revokeObjectURL(url);
-    img.src = url;
+  // 用 canvas 生成 46x46 小缩略图（dataURL，内存远小于整图 URL）
+  async function imGenThumb(item){
+    if(item._thumbLoading) return;
+    item._thumbLoading = true;
+    try{
+      const bmp = await createImageBitmap(item.file);
+      item.width = bmp.width; item.height = bmp.height;
+      const c = document.createElement('canvas');
+      const S = 46;
+      c.width = S; c.height = S;
+      const ctx = c.getContext('2d');
+      const scale = Math.min(S/bmp.width, S/bmp.height);
+      const w = Math.round(bmp.width*scale), h = Math.round(bmp.height*scale);
+      ctx.drawImage(bmp, (S-w)/2, (S-h)/2, w, h);
+      bmp.close();
+      try{ item.thumb = c.toDataURL('image/jpeg', 0.7); }catch(e){ item.thumb = ''; }
+      item._thumbLoading = false;
+      imUpdateRowThumb(item);
+    }catch(e){ item._thumbLoading=false; }
+  }
+
+  // 确保指定范围内的缩略图已生成
+  function imEnsureThumbs(start, end){
+    for(let i=start; i<end && i<imFiles.length; i++){
+      if(!imFiles[i].thumb && !imFiles[i]._thumbLoading) imGenThumb(imFiles[i]);
+    }
+  }
+
+  // 只更新已渲染行的缩略图 src（避免全量重绘）
+  function imUpdateRowThumb(item){
+    const rows = G('fileList').querySelectorAll('.fi');
+    rows.forEach(row=>{
+      if(row._item === item){
+        const img = row.querySelector('.fi-thumb');
+        if(img){ img.src = item.thumb; img.style.opacity = 1; }
+        const meta = row.querySelector('.fi-meta');
+        if(meta && item.width){
+          meta.firstElementChild.textContent = `${item.width}×${item.height}`;
+        }
+      }
+    });
   }
 
   window.imClearFiles = function(){
@@ -1396,41 +1534,87 @@ document.addEventListener('keydown', (e) => {
     imFiles = []; imZip = null; imFolderName = '';
     imRootDirHandle = null;
     imRenderList();
-    G('fileSec').classList.remove('active');
-    G('pvCard').style.display = 'none';
     G('dlBtn').style.visibility = 'hidden';
     G('progWrap').classList.remove('active');
+    // 若正在处理则终止本轮任务，并复位控制按钮
+    imRunning = false; imPaused = false; imCancelled = true;
+    imPauseWaiters = [];
+    G('pauseBtn').disabled = true;
+    G('cancelBtn').disabled = true;
+    G('pauseBtn').textContent = '暂停';
     setStep(1);
     imUpdateStart();
+    imLog('已清空文件列表', LC.warn);
     toast('已清空');
   };
 
-  function imRenderList(){
-    G('fileCount').textContent = imFiles.length;
-    const list = G('fileList');
-    if(imFiles.length===0){ list.innerHTML=''; return; }
-    list.innerHTML = imFiles.slice(0,200).map((item,idx)=>{
-      const parts = item.relativePath.split('/');
-      const folder = parts.length>1 ? parts.slice(0,-1).join('/') : '';
-      const dims = item.width ? `${item.width}×${item.height}` : '...';
-      const sizeKB = (item.size/1024).toFixed(1);
-      const sm = {pending:'待处理', ok:'完成', err:'失败'};
-      const sel = idx===imSelectedIdx ? ' selected' : '';
-      return `<div class="fi${sel}" data-idx="${idx}" onclick="imSelectFile(${idx})" style="cursor:pointer">
-        <img class="fi-thumb" src="${item.thumb||''}" style="${item.thumb?'':'opacity:.3'}">
-        <div class="fi-info">
-          <div class="fi-name" title="${item.relativePath}">${item.name}${folder?`<span class="folder-badge">${folder}</span>`:''}</div>
-          <div class="fi-meta"><span>${dims}</span><span>${sizeKB} KB</span></div>
-        </div>
-        <div class="fi-status ${item.status}">${sm[item.status]}</div>
-      </div>`;
-    }).join('') + (imFiles.length>200?`<div class="fi" style="justify-content:center;color:var(--c-3);font-size:11px">… 另外 ${imFiles.length-200} 张</div>`:'');
+  function imRowHTML(item, idx){
+    const parts = item.relativePath.split('/');
+    const folder = parts.length>1 ? parts.slice(0,-1).join('/') : '';
+    const dims = item.width ? `${item.width}×${item.height}` : '...';
+    const sizeKB = (item.size/1024).toFixed(1);
+    const sm = {pending:'待处理', ok:'完成', err:'失败'};
+    const sel = idx===imSelectedIdx ? ' selected' : '';
+    const row = document.createElement('div');
+    row.className = 'fi'+sel;
+    row.style.cursor = 'pointer';
+    row._item = item;
+    row.dataset.idx = idx;
+    row.innerHTML = `
+      <img class="fi-thumb" src="${item.thumb||''}" style="${item.thumb?'':'opacity:.3'}">
+      <div class="fi-info">
+        <div class="fi-name" title="${item.relativePath}">${item.name}${folder?`<span class="folder-badge">${folder}</span>`:''}</div>
+        <div class="fi-meta"><span>${dims}</span><span>${sizeKB} KB</span></div>
+      </div>
+      <div class="fi-status ${item.status}">${sm[item.status]}</div>`;
+    return row;
   }
 
+  function imRenderList(reset){
+    G('fileCount').textContent = imFiles.length;
+    const list = G('fileList');
+    if(imFiles.length===0){ list.innerHTML=''; imRenderedCount=0; return; }
+    if(reset || imRenderedCount===0){
+      list.innerHTML='';
+      imRenderedCount = 0;
+    }
+    const end = Math.min(imRenderedCount + PAGE_SIZE, imFiles.length);
+    const frag = document.createDocumentFragment();
+    for(let i=imRenderedCount; i<end; i++){
+      frag.appendChild(imRowHTML(imFiles[i], i));
+    }
+    list.appendChild(frag);
+    imRenderedCount = end;
+    imEnsureThumbs(0, end);
+  }
+
+  // 滚动到底自动加载下一批
+  (function(){
+    const list = G('fileList');
+    list.addEventListener('click', e=>{
+      const row = e.target.closest('.fi');
+      if(row) imSelectFile(Number(row.dataset.idx));
+    });
+    let rafId = null;
+    list.addEventListener('scroll', ()=>{
+      if(rafId) return;
+      rafId = requestAnimationFrame(()=>{
+        rafId = null;
+        if(imRenderedCount >= imFiles.length) return;
+        if(list.scrollTop + list.clientHeight >= list.scrollHeight - 120){
+          imRenderList(false);
+        }
+      });
+    }, {passive:true});
+  })();
+
+  let imSelectedRow = null;
   window.imSelectFile = function(idx){
     if(idx<0 || idx>=imFiles.length) return;
     imSelectedIdx = idx;
-    imRenderList();
+    if(imSelectedRow) imSelectedRow.classList.remove('selected');
+    imSelectedRow = G('fileList').querySelector(`.fi[data-idx="${idx}"]`);
+    if(imSelectedRow) imSelectedRow.classList.add('selected');
     imRefreshPreview();
   };
 
@@ -1485,72 +1669,99 @@ document.addEventListener('keydown', (e) => {
   }
 
   // ----- 处理一张图：先缩放，再叠加 -----
-  function imProcessOne(file){
-    return new Promise((resolve,reject)=>{
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = ()=>{
-        const dims = imCalcResize(img.naturalWidth, img.naturalHeight);
-        const canvas = document.createElement('canvas');
-        canvas.width = dims.w; canvas.height = dims.h;
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, dims.w, dims.h);
-        URL.revokeObjectURL(url);
-        if(imTpl){
-          const rect = imCalcOverlay(canvas.width, canvas.height, imTpl.naturalWidth, imTpl.naturalHeight);
-          ctx.globalAlpha = (parseInt(G('opacity').value)||100)/100;
-          ctx.drawImage(imTpl, rect.x, rect.y, rect.w, rect.h);
-          ctx.globalAlpha = 1;
-        }
-        resolve(canvas);
-      };
-      img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('加载失败')); };
-      img.src = url;
-    });
-  }
-
-  // ----- 实时预览 -----
-  function imRefreshPreview(){
-    if(imFiles.length===0) return;
-    if(imSelectedIdx<0 || imSelectedIdx>=imFiles.length) imSelectedIdx=0;
-    const item = imFiles[imSelectedIdx];
-    if(!item || !item.thumb) return;
-    const bgImg = new Image();
-    bgImg.onload = ()=>{
-      const dims = imCalcResize(bgImg.naturalWidth, bgImg.naturalHeight);
-      const halfH = dims.h / 2;
-      const halfW = dims.w / 2;
-      const maxW = 600;
-      const s = Math.min(1, maxW / halfW);
-      const pw = Math.round(halfW * s);
-      const ph = Math.round(halfH * s);
+  async function imProcessOne(file){
+    // 用 createImageBitmap 异步解码（比 new Image() 更快，支持硬件加速）
+    const bmp = await createImageBitmap(file);
+    try{
+      const dims = imCalcResize(bmp.width, bmp.height);
       const canvas = document.createElement('canvas');
-      canvas.width = pw; canvas.height = ph;
+      canvas.width = dims.w; canvas.height = dims.h;
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(bgImg, 0, 0, pw, ph);
+      ctx.drawImage(bmp, 0, 0, dims.w, dims.h);
       if(imTpl){
-        const rect = imCalcOverlay(pw, ph, imTpl.naturalWidth, imTpl.naturalHeight);
+        const rect = imCalcOverlay(canvas.width, canvas.height, imTpl.naturalWidth, imTpl.naturalHeight);
         ctx.globalAlpha = (parseInt(G('opacity').value)||100)/100;
         ctx.drawImage(imTpl, rect.x, rect.y, rect.w, rect.h);
         ctx.globalAlpha = 1;
       }
-      const box = G('pvBox');
-      box.innerHTML = '';
-      box.appendChild(canvas);
-      // 右下角尺寸信息
-      const info = document.createElement('div');
-      info.className = 'pv-size-info';
-      info.textContent = `${dims.w} × ${dims.h} px`;
-      box.appendChild(info);
-      // 更新预览标题
-      const label = document.querySelector('#tab-image .pv-label');
-      if(label) label.innerHTML = `<span class="dot"></span>实时预览（第 ${imSelectedIdx+1}/${imFiles.length} 张 · ${item.name}）`;
-    };
-    bgImg.src = item.thumb;
+      return canvas;
+    } finally {
+      bmp.close();  // 立即释放位图内存
+    }
+  }
+
+  // ----- 实时预览 -----
+  let imPvTimer = null;
+  function imRefreshPreview(){
+    if(imPvTimer) clearTimeout(imPvTimer);
+    imPvTimer = setTimeout(async ()=>{
+      if(imFiles.length===0) return;
+      if(imSelectedIdx<0 || imSelectedIdx>=imFiles.length) imSelectedIdx=0;
+      const item = imFiles[imSelectedIdx];
+      if(!item) return;
+      try{
+        const bmp = await createImageBitmap(item.file);
+        try{
+          const dims = imCalcResize(bmp.width, bmp.height);
+          const halfW = dims.w/2, halfH = dims.h/2;
+          const s = Math.min(1, 600/halfW);
+          const pw = Math.round(halfW*s), ph = Math.round(halfH*s);
+          const canvas = document.createElement('canvas');
+          canvas.width = pw; canvas.height = ph;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(bmp, 0, 0, pw, ph);
+          if(imTpl){
+            const rect = imCalcOverlay(pw, ph, imTpl.naturalWidth, imTpl.naturalHeight);
+            ctx.globalAlpha = (parseInt(G('opacity').value)||100)/100;
+            ctx.drawImage(imTpl, rect.x, rect.y, rect.w, rect.h);
+            ctx.globalAlpha = 1;
+          }
+          const box = G('pvBox');
+          box.innerHTML = '';
+          box.appendChild(canvas);
+          const info = document.createElement('div');
+          info.className = 'pv-size-info';
+          info.textContent = `${dims.w} × ${dims.h} px`;
+          box.appendChild(info);
+          const label = document.querySelector('#tab-image .pv-label');
+          if(label) label.innerHTML = `<span class="dot"></span>实时预览（第 ${imSelectedIdx+1}/${imFiles.length} 张 · ${item.name}）`;
+        } finally { bmp.close(); }
+      }catch(e){ console.warn('预览失败', e); }
+    }, 80);
+  }
+
+  // ----- 暂停 / 继续 -----
+  window.imPauseToggle = function(){
+    if(!imRunning) return;
+    if(imPaused){
+      imPaused = false;
+      G('pauseBtn').textContent = '暂停';
+      const ws = imPauseWaiters; imPauseWaiters = [];
+      ws.forEach(w => w());
+    } else {
+      imPaused = true;
+      G('pauseBtn').textContent = '继续';
+    }
+  };
+
+  // ----- 取消执行 -----
+  window.imCancelRun = function(){
+    if(!imRunning) return;
+    imCancelled = true;
+    imPaused = false;
+    G('pauseBtn').textContent = '暂停';
+    const ws = imPauseWaiters; imPauseWaiters = [];
+    ws.forEach(w => w());
+  };
+
+  // 暂停闸门：暂停时挂起全部 worker，恢复/取消时统一放行
+  function imPauseGate(){
+    if(!imPaused) return Promise.resolve();
+    return new Promise(res => { imPauseWaiters.push(res); });
   }
 
   // ----- 开始批量处理 -----
@@ -1561,14 +1772,29 @@ document.addEventListener('keydown', (e) => {
     if(isOw && !imFiles.every(f=>f.writable && f.dirHandle)){ toast('覆盖模式仅支持通过"选择文件夹"按钮导入的图片，请用该按钮重新导入'); return; }
     const format = G('format').value;
     const quality = parseInt(G('quality').value)/100;
+    // 重置运行状态
+    imZip = null; imRunning = true; imPaused = false; imCancelled = false;
+    imPauseWaiters = [];
+    G('pauseBtn').disabled = false;
+    G('cancelBtn').disabled = false;
+    G('pauseBtn').textContent = '暂停';
     G('progWrap').classList.add('active');
     G('startBtn').disabled = true;
     G('dlBtn').style.visibility = 'hidden';
     setStep(3);
     const zip = new JSZip();
     let ok=0, err=0, total=imFiles.length;
-    for(let i=0;i<total;i++){
+    imLog(`开始批量处理：共 ${total} 张，模式=${isOw?'原路径覆盖':'ZIP导出'}，格式=${format}`, LC.info);
+    let nextIdx = 0, processed = 0;
+    const CONCURRENCY = 8;
+    const list = G('fileList');
+
+    async function processOne(i){
       const item = imFiles[i]; item.status='pending';
+      // 标记当前正在处理的行并滚动跟随
+      list.querySelector('.fi.processing')?.classList.remove('processing');
+      let row = list.querySelector(`.fi[data-idx="${i}"]`);
+      if(row){ row.classList.add('processing'); row.scrollIntoView({block:'nearest', behavior:'auto'}); }
       try{
         const canvas = await imProcessOne(item.file);
         let mime;
@@ -1582,23 +1808,59 @@ document.addEventListener('keydown', (e) => {
           const extMap = {'jpeg':'jpg','png':'png','webp':'webp'};
           rel = rel.replace(/\.[^.]+$/, '.'+(extMap[format]||format));
         }
-        // 覆盖模式：同时写回原文件夹 + 加入 zip（供下载备份）
         if(isOw && item.dirHandle){
           await imWriteToPath(item.dirHandle, rel, blob);
         }
         zip.file(rel, blob);
         item.status='ok'; ok++;
-      }catch(e){ item.status='err'; err++; console.error(e); }
-      const pct = Math.round((i+1)/total*100);
+      }catch(e){ item.status='err'; err++; console.error(e); imLog(`失败：${item.name} — ${e.message}`, LC.err); }
+      processed++;
+      if(processed % 100 === 0 || processed === total){
+        imLog(`进度 ${processed}/${total}（${Math.round(processed/total*100)}%）`);
+      }
+      // 更新该行状态
+      row = list.querySelector(`.fi[data-idx="${i}"]`);
+      if(row){
+        const st = row.querySelector('.fi-status');
+        if(st){
+          st.className = 'fi-status ' + item.status;
+          st.textContent = {pending:'待处理', ok:'完成', err:'失败'}[item.status] || item.status;
+        }
+      }
+      const pct = Math.round(processed/total*100);
       G('progFill').style.width = pct+'%';
       G('progPct').textContent = pct+'%';
-      G('progLabel').textContent = `处理中 ${i+1}/${total} — ${item.name}`;
-      imRenderList();
-      await new Promise(r=>setTimeout(r,0));
+      G('progLabel').textContent = `处理中 ${processed}/${total} — ${item.name}`;
     }
-    // 两种模式都生成 ZIP 供下载
+
+    async function worker(){
+      while(nextIdx < total){
+        if(imCancelled) break;
+        await imPauseGate();
+        if(imCancelled) break;
+        const i = nextIdx++;
+        if(i >= imRenderedCount) imRenderList(false);
+        await processOne(i);
+      }
+    }
+    await Promise.all(Array.from({length:CONCURRENCY}, ()=>worker()));
+    // 处理结束：恢复控制按钮
+    imRunning = false; imPaused = false;
+    imPauseWaiters = [];
+    G('pauseBtn').disabled = true;
+    G('cancelBtn').disabled = true;
+    G('pauseBtn').textContent = '暂停';
+    if(imCancelled){
+      G('dlBtn').style.visibility = 'hidden';
+      G('progLabel').textContent = `已取消：完成 ${processed}/${total} 张，剩余 ${total-processed} 张未处理`;
+      imLog(`已取消：完成 ${processed} 张，剩余 ${total-processed} 张未处理`, LC.warn);
+      toast('已取消批量处理');
+      G('startBtn').disabled = false;
+      return;
+    }
     imZip = await zip.generateAsync({type:'blob'});
     G('dlBtn').style.visibility = 'visible';
+    imLog(`全部完成：成功 ${ok} 张`+(err?`，失败 ${err} 张`:'')+`，ZIP 已就绪`, LC.ok);
     if(isOw){
       G('progLabel').textContent = `完成：已写回原文件夹 ${ok} 张，ZIP 已就绪可下载`+(err?`，失败 ${err} 张`:'');
       toast(`已覆盖原文件夹 ${ok} 张，也可点"下载 ZIP"备份`);
@@ -1610,7 +1872,7 @@ document.addEventListener('keydown', (e) => {
   };
 
   window.imDownload = function(){
-    if(!imZip){ toast('请先处理图片'); return; }
+    if(!imZip){ toast(imRunning ? '处理中，ZIP 尚未生成，请稍候' : '请先处理图片'); return; }
     const url = URL.createObjectURL(imZip);
     const a = document.createElement('a');
     const d = new Date();
