@@ -593,7 +593,7 @@ section.active{display:flex}
           </div>
         </div>
         <input type="file" id="im-dirInput" webkitdirectory multiple hidden>
-        <input type="file" id="im-fileInput" accept="image/*" multiple hidden>
+        <input type="file" id="im-fileInput" accept="image/*,.zip" multiple hidden>
       </div>
 
       <!-- 中列：文件列表 + 预览 -->
@@ -693,9 +693,23 @@ section.active{display:flex}
             </div>
             <div class="fld">
               <label>偏移微调（像素）</label>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <div class="in-row"><input type="number" id="im-offX" value="0"><span class="unit">X</span></div>
-                <div class="in-row"><input type="number" id="im-offY" value="0"><span class="unit">Y</span></div>
+              <div style="margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--c-3);margin-bottom:2px">
+                  <span>X 水平偏移</span><span id="im-offXVal">0</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="range" id="im-offXRange" min="-500" max="500" value="0" style="flex:1">
+                  <input type="number" id="im-offX" value="0" style="width:70px">
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--c-3);margin-bottom:2px">
+                  <span>Y 垂直偏移</span><span id="im-offYVal">0</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="range" id="im-offYRange" min="-500" max="500" value="0" style="flex:1">
+                  <input type="number" id="im-offY" value="0" style="width:70px">
+                </div>
               </div>
             </div>
             <div class="fld">
@@ -1135,6 +1149,19 @@ document.addEventListener('keydown', (e) => {
   G('opacity').addEventListener('input', e=>{ G('opacityVal').textContent=e.target.value; imRefreshPreview(); });
   G('offX').addEventListener('input', imRefreshPreview);
   G('offY').addEventListener('input', imRefreshPreview);
+  // 偏移滑块 <-> 数字框 双向联动
+  function bindOffset(numId, rangeId, valId){
+    const num = G(numId), rng = G(rangeId), val = G(valId);
+    const sync = (v) => { num.value = v; rng.value = v; val.textContent = v; imRefreshPreview(); };
+    rng.addEventListener('input', ()=>sync(parseInt(rng.value)||0));
+    num.addEventListener('input', ()=>{
+      let v = parseInt(num.value)||0;
+      v = Math.max(-500, Math.min(500, v));
+      rng.value = v; val.textContent = v; imRefreshPreview();
+    });
+  }
+  bindOffset('offX', 'offXRange', 'offXVal');
+  bindOffset('offY', 'offYRange', 'offYVal');
   ['widthVal','heightVal','percentVal','longestVal'].forEach(id=>G(id).addEventListener('input', imRefreshPreview));
   G('keepRatio').addEventListener('change', imRefreshPreview);
 
@@ -1281,14 +1308,45 @@ document.addEventListener('keydown', (e) => {
     } else done();
   }
 
-  function imHandleFiles(fileList, fromDir, writable){
-    const arr = [];
+  // 解压 zip，返回 {file, relativePath} 列表
+  async function imExtractZip(zipFile){
+    const zip = await JSZip.loadAsync(zipFile);
+    const out = [];
+    const zipName = zipFile.name.replace(/\.zip$/i, '');
+    for(const rel in zip.files){
+      const entry = zip.files[rel];
+      if(entry.dir) continue;
+      if(!IMG_RE.test(rel)) continue;
+      // 统一相对路径：放在 zip 名下面，保持目录结构
+      const path = zipName + '/' + rel;
+      const blob = await entry.async('blob');
+      const f = new File([blob], rel.split('/').pop(), { type: blob.type });
+      f.relativePath = path;
+      out.push(f);
+    }
+    return out;
+  }
+
+  async function imHandleFiles(fileList, fromDir, writable){
+    const normal = [];
+    const zips = [];
     for(const f of fileList){
+      if(/\.zip$/i.test(f.name)){ zips.push(f); continue; }
       if(IMG_RE.test(f.name)){
         if(!f.relativePath) f.relativePath = fromDir?(f.webkitRelativePath||f.name):f.name;
-        arr.push(f);
+        normal.push(f);
       }
     }
+    // 解压所有 zip
+    const extracted = [];
+    for(const z of zips){
+      try{
+        toast('正在解压：' + z.name);
+        const files = await imExtractZip(z);
+        extracted.push(...files);
+      }catch(e){ console.error('解压失败', z.name, e); toast('解压失败：' + z.name); }
+    }
+    const arr = [...normal, ...extracted];
     if(arr.length===0){ toast('未找到图片文件'); return; }
     const collected = arr.map(f => ({
       file: f, relativePath: f.relativePath, name: f.name,
