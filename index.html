@@ -298,7 +298,7 @@ body.dark .m-badge{border-color:#2c4a3f}
 .im-switch input:checked + .im-knob::after{left:21px}
 .pv-card{flex:1 1 0; min-height:254px}
 .pv-card .im-card-body{overflow:hidden}
-.pv-box .m-empty{min-height:0; padding:14px; width:100%}
+.pv-box .m-empty{position:absolute; inset:0; min-height:0; padding:14px; width:100%; height:100%}
 
 /* 设置面板 */
 .grp + .grp{border-top:1px solid var(--border-soft); margin-top:12px; padding-top:12px}
@@ -396,19 +396,40 @@ body.dark .log-state{border-color:#2c4a3f}
 .rn-container .im-card{flex-shrink:0}
 .rn-rules .im-card-body{padding:8px 14px}
 .rn-preview-card{flex:1 1 0; min-height:56px; display:flex; flex-direction:column}
-.rn-preview{flex:1 1 0; min-height:0; display:flex; flex-direction:column}
+.rn-preview{flex:1 1 0; min-height:0; display:flex; flex-direction:row; gap:10px; padding:10px}
+.pv-col{flex:1 1 0; min-width:0; display:flex; flex-direction:column; border:1px solid var(--border-soft); border-radius:8px; overflow:hidden}
+.pv-col-head{padding:8px 12px; background:var(--panel); font-size:12px; font-weight:600; color:var(--text-2); border-bottom:1px solid var(--border-soft)}
+.pv-list{flex:1; overflow-y:auto; overflow-x:auto; min-height:0}
+.pv-empty{color:var(--text-3); text-align:center; padding:24px}
+.pv-row{padding:8px 12px; border-bottom:1px solid var(--border-soft); white-space:nowrap; font-size:13px}
+.pv-row.warn{color:var(--danger); background:var(--danger-bg); border-bottom:1px solid var(--border)}
+.pv-col-head .len-warn{margin-left:8px; color:var(--danger); font-weight:500; font-size:11px}
 .rn-log-card{flex:1 1 0; min-height:86px; display:flex; flex-direction:column}
-.rn-status-card{flex:0 0 72px}
-.rn-actions-card{flex:0 0 84px; display:flex; flex-direction:column}
-.rn-actions{padding:6px 14px; flex:1 1 auto; align-items:center}
-.rn-actions .im-btn{padding:6px 14px}
+.rn-mid-row{display:flex; gap:12px; flex:0 0 96px; min-height:0}
+.rn-mid-row .im-card{flex:1 1 0; min-width:0; display:flex; flex-direction:column}
+.rn-mid-row .rn-status-card .im-card-body{
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px 14px 14px;
+    text-align: left;
+    flex: 1 1 auto;
+    min-height: 0;
+    box-sizing: border-box;
+}
+#tab-rename .rn-status-card #status{min-height:18px; margin:0; display:block; text-align:left; width:auto}
+.rn-status-card{flex:1 1 0; min-height:0}
+.rn-actions-card{flex:1 1 0; min-height:0; display:flex; flex-direction:column}
+.rn-actions{padding:10px 14px 14px; flex:1 1 auto; align-items:center; justify-content:space-between; gap:8px; flex-wrap:nowrap}
+.rn-actions .im-btn{padding:4px 10px; font-size:12px; white-space:nowrap; line-height:1.4}
 #tab-rename .row + .row{margin-top:4px}
 #tab-rename .quick-tags{margin-top:4px}
 #tab-rename .hint{font-size:12px; color:var(--text-3); margin-top:3px}
-#tab-rename .rn-container .im-card-head{padding:5px 14px}
-#tab-rename .rn-container .im-card-body{padding:7px 14px}
+#tab-rename .rn-container .im-card-head{padding:8px 14px}
+#tab-rename .rn-container .im-card-body{padding:10px 14px}
 .rn-log-card #log{flex:1; min-height:0; overflow-y:auto; margin:0; border-radius:0}
-#tab-rename .rn-status-card #status{min-height:18px; margin:0}
+.rn-drop-hint{font-size:12px; color:var(--text-3); margin-top:6px}
+.im-card.rn-dropzone.drag{outline:2px dashed var(--accent-2); outline-offset:-4px; background:var(--accent-mint)}
 #tab-rename .rn-container{gap:8px}
 #tab-rename h1{font-size:18px; font-weight:800; display:flex; align-items:center; gap:10px; letter-spacing:-.2px}
 #tab-rename h1 .dot{width:10px; height:10px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft)}
@@ -445,6 +466,7 @@ body.dark .log-state{border-color:#2c4a3f}
 }
 #tab-rename button:hover{background:var(--panel); border-color:var(--border)}
 #tab-rename button.primary{background:var(--accent-2); color:#fff; border-color:var(--accent-2); font-weight:600}
+#tab-rename button.sm{padding:5px 12px; font-size:11.5px}
 #tab-rename button.primary:hover{background:var(--accent); border-color:var(--accent)}
 #tab-rename .radio-group, #tab-rename .check-group{display:flex; gap:16px; align-items:center; font-size:13px; flex-wrap:wrap}
 #tab-rename .radio-group label, #tab-rename .check-group label{color:var(--text); cursor:pointer; font-weight:400; display:flex; align-items:center; gap:5px}
@@ -460,12 +482,13 @@ body.dark .log-state{border-color:#2c4a3f}
 #tab-rename .mode-tabs label:hover{color:var(--text)}
 #tab-rename .mode-tabs label.active{background:var(--card); color:var(--accent); box-shadow:0 1px 3px rgba(0,0,0,.07); font-weight:600}
 #tab-rename .mode-tabs input{display:none}
-#tab-rename table{width:100%; border-collapse:separate; border-spacing:0; font-size:13px; flex:1; min-height:0; overflow-y:auto; display:block}
+#tab-rename table{width:100%; border-collapse:separate; border-spacing:0; font-size:13px; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; display:block; table-layout:fixed}
 #tab-rename thead th{
   text-align:left; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--border-soft);
   position:sticky; top:0; font-weight:600; color:var(--text-2); font-size:12px; letter-spacing:.3px;
+  width:50%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-#tab-rename tbody td{padding:8px 14px; border-bottom:1px solid var(--border-soft)}
+#tab-rename tbody td{padding:8px 14px; border-bottom:1px solid var(--border-soft); width:50%; overflow-x:auto; white-space:nowrap; max-width:0; scrollbar-width:thin}
 #tab-rename tbody tr:hover{background:var(--panel)}
 #tab-rename tr.warn td{color:var(--danger); background:var(--danger-bg)}
 #tab-rename .actions{
@@ -576,6 +599,12 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
   .rn-log-card{flex:none; height:180px; min-height:0}
   .rn-status-card{flex:none; height:auto; min-height:72px}
   .rn-actions-card{flex:none; height:auto; min-height:84px}
+  .rn-actions-card{flex:none; height:auto; min-height:0; display:flex}
+  .rn-mid-row{flex-direction:column; flex:none; height:auto; display:flex; gap:12px}
+  .rn-mid-row .im-card{flex:none; min-width:0; display:block}
+  .rn-actions{flex-wrap:wrap; justify-content:flex-start; gap:8px; padding:10px 12px; height:auto; flex:none}
+  .rn-actions .rn-kbd{flex:1 1 100%; font-size:11px}
+  .rn-actions .im-btn{flex:1 1 auto; margin:0}
   .rn-rules{flex:none; max-height:none}
   .mode-tabs{flex-wrap:nowrap; overflow-x:auto}
   .mode-tabs label{white-space:nowrap; padding:7px 12px; font-size:12.5px}
@@ -906,12 +935,14 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
 
     <div class="im-card">
       <div class="im-card-head">
-        <h3><span class="m-tag">R1</span>选择目标文件夹</h3>
+        <h3><span class="m-tag">R1</span>模块1·选择目标文件夹</h3>
         <span class="m-badge">已接入</span>
       </div>
       <div class="im-card-body">
         <div class="rn-row">
           <button id="pickBtn" class="im-btn primary">选择文件夹…</button>
+          <button id="pickFilesBtn" class="im-btn">选择文件</button>
+          <button id="rnClearBtn" class="im-btn">清空</button>
           <span class="folder-path" id="folderPath">未选择（点上方按钮选择）</span>
         </div>
       </div>
@@ -919,7 +950,7 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
 
     <div class="im-card rn-rules">
       <div class="im-card-head">
-        <h3><span class="m-tag">R2</span>设置命名规则</h3>
+        <h3><span class="m-tag">R2</span>模块2·设置命名规则</h3>
         <span class="m-badge">已接入</span>
       </div>
       <div class="im-card-body">
@@ -941,6 +972,7 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
             <div class="field"><label>起始编号</label><input type="number" id="startNum" value="1" min="0" style="width:90px"></div>
             <div class="field"><label>编号位数</label><input type="number" id="digits" value="1" min="1" max="10" style="width:80px"></div>
             <div class="field"><label>后缀</label><input type="text" id="suffix" placeholder="如："></div>
+            <div class="wrap-warn" id="numWarn" style="display:none; color:var(--danger); font-size:12px"></div>
           </div>
           <div class="quick-tags">
             <span style="font-size:12px;color:var(--text-3)">快捷前缀：</span>
@@ -957,6 +989,7 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
           <div class="row">
             <div class="field"><label>原文件名前加</label><input type="text" id="wrapPrefix" placeholder="如：主图_"></div>
             <div class="field"><label>原文件名后加</label><input type="text" id="wrapSuffix" placeholder="如：_800"></div>
+            <div class="wrap-warn" id="wrapWarn" style="display:none; color:var(--danger); font-size:12px"></div>
           </div>
           <div class="hint">保留原文件名，在其前后拼接文字；例如原图「logo.png」→ 前加「主图_」得「主图_logo.png」，后加「_800」得「logo_800.png」</div>
         </div>
@@ -966,6 +999,7 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
             <div class="field"><label>查找内容</label><input type="text" id="findText" placeholder="如：-"></div>
             <div class="field"><label>替换为</label><input type="text" id="replaceText" placeholder="留空 = 删除"></div>
             <label class="ck-row"><input type="checkbox" id="caseSensitive" checked> 区分大小写</label>
+            <div class="wrap-warn" id="repWarn" style="display:none; color:var(--danger); font-size:12px"></div>
           </div>
           <div class="hint">示例：查找「-」替换为「+」→ 文件-01.jpg 变成 文件+01.jpg；替换为留空 → 文件01.jpg</div>
         </div>
@@ -994,46 +1028,54 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
 
     <div class="im-card rn-preview-card">
       <div class="im-card-head">
-        <h3><span class="m-tag">R3</span>预览（原名 → 新名）</h3>
+        <h3><span class="m-tag">R3</span>模块3·预览（原名 → 新名）</h3>
         <span class="m-badge">已接入</span>
       </div>
       <div class="im-card-body rn-preview">
-        <table>
-          <thead><tr><th style="width:50%">原文件名</th><th>新文件名</th></tr></thead>
-          <tbody id="previewBody">
-            <tr><td colspan="2" style="color:var(--text-3);text-align:center;padding:24px">暂无预览</td></tr>
-          </tbody>
-        </table>
+        <div class="pv-col">
+          <div class="pv-col-head">原文件名</div>
+          <div class="pv-list" id="previewOld"><div class="pv-empty">暂无预览</div></div>
+        </div>
+        <div class="pv-col">
+          <div class="pv-col-head">新文件名 <span class="len-warn" id="lenWarn" style="display:none"></span></div>
+          <div class="pv-list" id="previewNew"><div class="pv-empty">暂无预览</div></div>
+        </div>
       </div>
     </div>
 
-    <div class="im-card rn-actions-card">
-      <div class="im-card-head">
-        <h3><span class="m-tag">R4</span>处理操作</h3>
-        <span class="m-badge">已接入</span>
+    <div class="rn-mid-row">
+      <div class="im-card rn-status-card">
+        <div class="im-card-head">
+          <h3><span class="m-tag">R4</span>模块4·处理结果</h3>
+          <span class="m-badge">已接入</span>
+        </div>
+        <div class="im-card-body">
+          <div id="status"></div>
+        </div>
       </div>
-      <div class="im-card-body rn-actions">
-        <span class="rn-kbd">快捷键：回车=执行 &nbsp; Backspace=撤销 &nbsp; / （、）=刷新预览</span>
-        <button id="refreshBtn" class="im-btn ghost">刷新预览</button>
-        <button id="undoBtn" class="im-btn ghost">撤销上次</button>
-        <button id="applyBtn" class="im-btn primary">执行重命名</button>
-      </div>
-    </div>
 
-    <div class="im-card rn-status-card">
-      <div class="im-card-head">
-        <h3><span class="m-tag">R5</span>处理结果</h3>
-        <span class="m-badge">已接入</span>
-      </div>
-      <div class="im-card-body">
-        <div id="status"></div>
+      <div class="im-card rn-actions-card">
+        <div class="im-card-head">
+          <h3><span class="m-tag">R5</span>模块5·处理操作</h3>
+          <span class="m-badge">已接入</span>
+        </div>
+        <div class="im-card-body rn-actions">
+          <span class="rn-kbd">回车=执行 &nbsp; Backspace=撤销 &nbsp; / =刷新</span>
+          <button id="refreshBtn" class="im-btn ghost">刷新预览</button>
+          <button id="undoBtn" class="im-btn ghost">撤销上次</button>
+          <button id="applyBtn" class="im-btn primary">执行重命名</button>
+        </div>
       </div>
     </div>
 
     <div class="im-card rn-log-card">
       <div class="im-card-head">
-        <h3><span class="m-tag">R6</span>日志台</h3>
-        <span class="m-badge">已接入</span>
+        <h3><span class="m-tag">R6</span>模块6·日志台</h3>
+        <div class="log-actions">
+          <span class="log-state"><span class="dot"></span>监听中</span>
+          <button class="im-btn ghost sm" onclick="rnCopyLog()">复制日志</button>
+          <button class="im-btn ghost sm" onclick="rnClearLog()">清空</button>
+        </div>
       </div>
       <div id="log"></div>
     </div>
@@ -1072,6 +1114,7 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
 <script>
 // ===== 重命名工具 =====
 let dirHandle = null;
+let looseFiles = [];   // 直接选择/拖入的文件（无目录句柄）
 let lastUndo = [];
 const $ = id => document.getElementById(id);
 function setStatus(m) { $('status').textContent = m; }
@@ -1080,11 +1123,12 @@ function log(msg, color) {
   const el = $('log'); el.classList.add('show');
   const line = document.createElement('div');
   line.style.color = color || '#c9d1d9';
-  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
-  el.appendChild(line); el.scrollTop = el.scrollHeight; console.log(msg);
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;  el.appendChild(line); el.scrollTop = el.scrollHeight; console.log(msg);
 }
 const C = { ok:'#5fbdb0', err:'#f0716c', warn:'#d9b45b', info:'#7cb8e0' };
 log('日志台已就绪，请先选择文件夹…', C.info);
+function rnCopyLog(){ const t=$('log').innerText; navigator.clipboard.writeText(t).then(()=>log('日志已复制', C.ok)).catch(()=>log('复制失败', C.err)); }
+function rnClearLog(){ $('log').innerHTML=''; log('日志已清空', C.info); }
 
 let dbPromise = null;
 function openDB() {
@@ -1163,7 +1207,10 @@ function toggleMode() {
   if (dirHandle) refreshPreview();
 }
 async function collectItems() {
-  if (!dirHandle) return [];
+  if (!dirHandle) {
+    if (looseFiles.length) return looseFiles.map(f => ({ name: f.name, type: 'file' }));
+    return [];
+  }
   const mode = document.querySelector('input[name=targetMode]:checked').value;
   const items = [];
   for await (const entry of dirHandle.values()) {
@@ -1206,32 +1253,39 @@ function buildNewName(item, index) {
   }
 }
 async function refreshPreview() {
-  const body = $('previewBody'); body.innerHTML = '';
-  if (!dirHandle) { body.innerHTML = '<tr><td colspan="2" style="color:var(--text-3);text-align:center;padding:24px">请先选择文件夹</td></tr>'; setStatus(''); return; }
+  const oldBox = $('previewOld'), newBox = $('previewNew');
+  oldBox.innerHTML = ''; newBox.innerHTML = '';
+  if (!dirHandle && looseFiles.length === 0) { oldBox.innerHTML = '<div class="pv-empty">请先选择文件夹或文件</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); return; }
   const items = await collectItems();
-  if (items.length === 0) { body.innerHTML = '<tr><td colspan="2" style="color:var(--text-3);text-align:center;padding:24px">该目录下没有符合条件的项</td></tr>'; setStatus(''); return; }
+  if (items.length === 0) { oldBox.innerHTML = '<div class="pv-empty">没有符合条件的项</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); return; }
   const plan = items.map((it, i) => ({ oldName: it.name, newName: buildNewName(it, i), type: it.type }));
   const seen = new Set();
   for (const p of plan) {
     p.conflict = false; p.reason = '';
-    if (p.newName.toLowerCase() !== p.oldName.toLowerCase()) {
+    if (p.newName.length > 255) { p.conflict = true; p.reason = '文件名过长(>255字符)'; }
+    else if (dirHandle && p.newName.toLowerCase() !== p.oldName.toLowerCase()) {
       try { if (p.type === 'file') await dirHandle.getFileHandle(p.newName); else await dirHandle.getDirectoryHandle(p.newName); p.conflict = true; p.reason = '目标已存在'; } catch (e) {}
     }
     const key = p.newName.toLowerCase();
     if (seen.has(key)) { p.conflict = true; p.reason = '批次内重名'; }
     seen.add(key);
   }
-  let nConflict = 0, nChanged = 0;
+  let nConflict = 0, nChanged = 0, nLong = 0;
   for (const p of plan) {
-    const tr = document.createElement('tr');
-    if (p.conflict) tr.className = 'warn';
-    const td1 = document.createElement('td'); td1.textContent = p.oldName;
-    const td2 = document.createElement('td'); td2.className = 'new';
-    td2.textContent = p.conflict ? `${p.newName}  ⚠ ${p.reason}` : p.newName;
-    tr.appendChild(td1); tr.appendChild(td2); body.appendChild(tr);
+    const ro = document.createElement('div');
+    ro.className = 'pv-row';
+    ro.textContent = p.oldName;
+    oldBox.appendChild(ro);
+    const rn = document.createElement('div');
+    rn.className = 'pv-row' + (p.conflict ? ' warn' : '');
+    rn.textContent = p.newName;
+    newBox.appendChild(rn);
     if (p.conflict) nConflict++;
+    if (p.newName.length > 255) nLong++;
     if (p.oldName !== p.newName) nChanged++;
   }
+  const lw = $('lenWarn');
+  if (nLong > 0) { lw.style.display = ''; lw.textContent = `（${nLong} 项超过255字符）`; } else { lw.style.display = 'none'; }
   setStatus(`共 ${plan.length} 项，其中 ${nChanged} 项需要改名，${nConflict} 项有冲突（红色，将被跳过）`);
   return plan;
 }
@@ -1300,13 +1354,79 @@ async function undo() {
   log(`✓ 已撤销 ${done} 项，失败 ${failed} 项。`, failed ? C.err : C.ok);
 }
 $('pickBtn').onclick = pickFolder;
+$('pickFilesBtn').onclick = () => {
+  let inp = document.getElementById('rnFileInput');
+  if (!inp) {
+    inp = document.createElement('input');
+    inp.type = 'file'; inp.id = 'rnFileInput'; inp.multiple = true;
+    inp.style.display = 'none';
+    inp.addEventListener('change', () => loadLooseFiles(inp.files));
+    document.body.appendChild(inp);
+  }
+  inp.value = ''; inp.click();
+};
+function loadLooseFiles(fileList) {
+  const files = Array.from(fileList).filter(f => !/\.zip$/i.test(f.name));
+  if (!files.length) { showTip('未选择有效文件'); return; }
+  dirHandle = null;
+  looseFiles = files;
+  $('folderPath').textContent = files.length + ' 个文件（来自直接选择）';
+  lastUndo = [];
+  log('已载入 ' + files.length + ' 个文件，可预览命名；原地改名请改选所在文件夹');
+  refreshPreview();
+}
+$('rnClearBtn').onclick = () => {
+  dirHandle = null; looseFiles = [];
+  $('folderPath').textContent = '未选择（点上方按钮选择）';
+  refreshPreview();
+  log('已清空');
+};
 $('refreshBtn').onclick = refreshPreview;
 $('applyBtn').onclick = apply;
 $('undoBtn').onclick = undo;
+// R3 左右双栏同步垂直滚动
+(function(){
+  const a = $('previewOld'), b = $('previewNew');
+  let sync = false;
+  a.addEventListener('scroll', () => { if(sync) return; sync = true; b.scrollTop = a.scrollTop; requestAnimationFrame(()=>sync=false); });
+  b.addEventListener('scroll', () => { if(sync) return; sync = true; a.scrollTop = b.scrollTop; requestAnimationFrame(()=>sync=false); });
+})();
 document.querySelectorAll('input[name=renameMode]').forEach(r => r.onchange = toggleMode);
+let _refreshTimer = null;
+function scheduleRefresh(){
+  clearTimeout(_refreshTimer);
+  _refreshTimer = setTimeout(() => { if (dirHandle || looseFiles.length) refreshPreview(); }, 150);
+}
 ['prefix','suffix','startNum','digits','keepExt','sortBy','findText','replaceText','caseSensitive','wrapPrefix','wrapSuffix'].forEach(id => {
-  $(id).addEventListener('input', () => { if (dirHandle) refreshPreview(); });
+  $(id).addEventListener('input', scheduleRefresh);
 });
+const ILLEGAL_RE = /[\\/:*?"<>|]/g;
+function checkIllegal(id, warnEl){
+  const v = $(id).value;
+  const bad = v.match(ILLEGAL_RE);
+  if (bad) {
+    warnEl.style.display = '';
+    warnEl.textContent = '文件名不能包含 \\ / : * ? " < > | 这些符号，已自动替换为下划线';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+function checkBoth(ids, warnEl){
+  const bad = ids.some(id => ILLEGAL_RE.test($(id).value));
+  ILLEGAL_RE.lastIndex = 0;
+  if (bad) {
+    warnEl.style.display = '';
+    warnEl.textContent = '文件名不能包含 \\ / : * ? " < > | 这些符号，已自动替换为下划线';
+  } else {
+    warnEl.style.display = 'none';
+  }
+  if (dirHandle || looseFiles.length) scheduleRefresh();
+}
+['wrapPrefix','wrapSuffix'].forEach(id => $(id).addEventListener('input', () => checkBoth(['wrapPrefix','wrapSuffix'], $('wrapWarn'))));
+// 编号模式 前缀/后缀
+['prefix','suffix'].forEach(id => $(id).addEventListener('input', () => checkBoth(['prefix','suffix'], $('numWarn'))));
+// 查找替换 替换为
+$('replaceText').addEventListener('input', () => checkIllegal('replaceText', $('repWarn')));
 document.querySelectorAll('input[name=targetMode]').forEach(r => r.onchange = () => { if (dirHandle) refreshPreview(); });
 document.querySelectorAll('#tab-rename .quick-tag').forEach(btn => {
   btn.addEventListener('click', () => { $('prefix').value = btn.dataset.prefix; if (dirHandle) refreshPreview(); });
