@@ -3173,9 +3173,12 @@ function renderRows(){
   });
 }
 $('addRowBtn').addEventListener('click', function(){
-  state.rows.push({ label:'参数', value:'' });
+  const row = { label:'参数', value:'' };
+  /* 固定行（保养）保持在最底部：新参数插入到固定行前面 */
+  const fixedIdx = state.rows.findIndex(r => r.fixed);
+  if(fixedIdx === -1){ state.rows.push(row); } else { state.rows.splice(fixedIdx, 0, row); }
   renderRows(); scheduleRender();
-  dtLog('已添加参数行：' + state.rows[state.rows.length-1].label, DT_C.info);
+  dtLog('已添加参数行：' + row.label + (fixedIdx === -1 ? '' : '（位于保养上方）'), DT_C.info);
 });
 
 /* ================= 导出设置 ================= */
