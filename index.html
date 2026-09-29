@@ -404,6 +404,18 @@ body.dark .log-state{border-color:#2c4a3f}
 .pv-row{padding:8px 12px; border-bottom:1px solid var(--border-soft); white-space:nowrap; font-size:13px}
 .pv-row.warn{color:var(--danger); background:var(--danger-bg); border-bottom:1px solid var(--border)}
 .pv-col-head .len-warn{margin-left:8px; color:var(--danger); font-weight:500; font-size:11px}
+.rn-preview .pv-col-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.pv-col-title{display:flex; align-items:center; gap:6px; min-width:0}
+.pv-col-title .pv-check{flex-shrink:0; margin:0; accent-color:var(--accent); cursor:pointer}
+.pv-sel-count{font-size:11px; color:var(--text-3); font-weight:500; white-space:nowrap}
+.pv-row{display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border-soft); white-space:nowrap; font-size:13px}
+.pv-row .pv-check{flex-shrink:0; margin:0; accent-color:var(--accent); cursor:pointer}
+.pv-row .pv-check:disabled{cursor:not-allowed}
+.pv-row .pv-name{overflow:hidden; text-overflow:ellipsis; min-width:0}
+.pv-row.warn .pv-name{color:var(--danger)}
+.pv-row{transition:background-color .12s ease}
+.pv-row.pv-hover{background:var(--accent-soft)}
+.pv-row.warn.pv-hover{background:var(--danger-bg); box-shadow:inset 3px 0 0 var(--danger)}
 .rn-log-card{flex:1 1 0; min-height:86px; display:flex; flex-direction:column}
 .rn-mid-row{display:flex; gap:12px; flex:0 0 96px; min-height:0}
 .rn-mid-row .im-card{flex:1 1 0; min-width:0; display:flex; flex-direction:column}
@@ -459,6 +471,10 @@ body.dark .log-state{border-color:#2c4a3f}
 #tab-rename .folder-path{
   flex:1; padding:8px 14px; background:var(--panel); border:1px dashed var(--border); border-radius:8px;
   font-size:13px; color:var(--text-2); min-width:200px; word-break:break-all;
+  transition:border-color .15s, background .15s, box-shadow .15s;
+}
+#tab-rename .folder-path.drop-hover{
+  border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 3px var(--accent-soft);
 }
 #tab-rename button{
   padding:9px 18px; border:1px solid var(--border); border-radius:8px; background:var(--card);
@@ -1085,12 +1101,12 @@ body.dark #tab-detail .dt-stage{
   <div class="rn-container">
     <div class="rn-head">
       <h1><span class="dot"></span>批量重命名工具</h1>
-      <div class="rn-sub">选择文件夹 → 设置规则 → 预览 → 一键执行，支持撤销</div>
+      <div class="rn-sub">选择文件夹或文件 → 设置规则 → 预览 → 一键执行，支持撤销</div>
     </div>
 
     <div class="im-card">
       <div class="im-card-head">
-        <h3><span class="m-tag">R1</span>模块1·选择目标文件夹</h3>
+        <h3><span class="m-tag">R1</span>模块1·选择目标文件夹/文件</h3>
         <span class="m-badge">已接入</span>
       </div>
       <div class="im-card-body">
@@ -1098,7 +1114,7 @@ body.dark #tab-detail .dt-stage{
           <button id="pickBtn" class="im-btn primary">选择文件夹…</button>
           <button id="pickFilesBtn" class="im-btn">选择文件</button>
           <button id="rnClearBtn" class="im-btn">清空</button>
-          <span class="folder-path" id="folderPath">未选择（点上方按钮选择）</span>
+          <span class="folder-path" id="folderPath">未选择（点上方按钮选择，或直接拖入文件）</span>
         </div>
       </div>
     </div>
@@ -1188,7 +1204,13 @@ body.dark #tab-detail .dt-stage{
       </div>
       <div class="im-card-body rn-preview">
         <div class="pv-col">
-          <div class="pv-col-head">原文件名</div>
+          <div class="pv-col-head">
+            <span class="pv-col-title">
+              <input type="checkbox" class="pv-check" id="selectAllCb" title="全选/全不选">
+              <span>原文件名</span>
+            </span>
+            <span class="pv-sel-count" id="selCount"></span>
+          </div>
           <div class="pv-list" id="previewOld"><div class="pv-empty">暂无预览</div></div>
         </div>
         <div class="pv-col">
@@ -1219,6 +1241,7 @@ body.dark #tab-detail .dt-stage{
           <button id="refreshBtn" class="im-btn ghost">刷新预览</button>
           <button id="undoBtn" class="im-btn ghost">撤销上次</button>
           <button id="applyBtn" class="im-btn primary">执行重命名</button>
+          <button id="exportZipBtn" class="im-btn ghost" style="display:none" title="拖入的文件无法原地改名，可将勾选的改名文件打包下载">导出改名 ZIP</button>
         </div>
       </div>
     </div>
@@ -1243,13 +1266,14 @@ body.dark #tab-detail .dt-stage{
   <div class="dt-main">
     <div class="dt-head">
       <h1><span class="dot"></span>详情模板</h1>
-      <div class="dt-sub">白底图可上传替换 · 背景色可自定义 · 参数可修改 · 一键导出 PNG / JPG / WebP</div>
+      <div class="dt-sub">白底图可上传替换 · 背景色可自定义 · 参数可修改 · 一键导出 PNG / JPG / WebP（预览区滚轮可缩放白底图，双击恢复 100%）</div>
     </div>
     <div class="dt-body">
       <!-- ===== 预览区 ===== -->
       <section class="dt-preview-wrap" aria-label="模板预览">
         <div class="dt-preview-meta">
           <span>模板 <b id="previewSize">1440 × 1920</b>（模板原比例）</span>
+          <span class="tag" id="dtZoomBadge">白底图 100%</span>
           <span class="tag" id="exportTag">导出 1440 × 1920 · JPG</span>
         </div>
         <div class="dt-stage">
@@ -1385,8 +1409,13 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
 <script>
 // ===== 重命名工具 =====
 let dirHandle = null;
-let looseFiles = [];   // 直接选择/拖入的文件（无目录句柄）
+let fileHandles = [];  // 选择文件（showOpenFilePicker）拿到的可写句柄，支持原地改名
+let looseFiles = [];   // 回退：只读 File 对象（浏览器不支持句柄时，仅预览）
 let lastUndo = [];
+function hasItems(){ return !!(dirHandle || fileHandles.length || looseFiles.length); }
+let selected = new Set();      // 预览中勾选要改名的文件（按原名记录）
+let selectedTouched = false;   // 用户是否手动调整过勾选（决定默认全选）
+let lastPlan = null;           // 最近一次预览计划，供 R4 状态实时更新
 const $ = id => document.getElementById(id);
 function setStatus(m) { $('status').textContent = m; }
 function showTip(m) { const t=$('tip'); t.textContent=m; t.classList.add('show'); }
@@ -1449,11 +1478,13 @@ async function pickFolder() {
   if (!('showDirectoryPicker' in window)) { showTip('当前浏览器不支持此功能，请用 Chrome 或 Edge 打开。'); return; }
   try {
     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    await ensurePermission(dirHandle);
+    const ok = await ensurePermission(dirHandle);
     await saveDirHandle(dirHandle);
-    $('folderPath').textContent = dirHandle.name + ' （已授权读写）';
+    $('folderPath').textContent = dirHandle.name + (ok ? ' （已授权读写）' : ' （未获写入授权，仅预览）');
     lastUndo = [];
-    log('已选择文件夹：' + dirHandle.name);
+    updateApplyState();
+    if (!ok) log('未获得该文件夹的写入授权，只能预览，无法原地改名。', C.warn);
+    else log('已选择文件夹：' + dirHandle.name);
     await refreshPreview();
   } catch (e) {
     if (e.name !== 'AbortError') log('选择文件夹出错：' + e.message, C.err);
@@ -1464,7 +1495,8 @@ async function pickFolder() {
     const saved = await loadDirHandle();
     if (!saved) return;
     const ok = await ensurePermission(saved);
-    if (ok) { dirHandle = saved; $('folderPath').textContent = saved.name + ' （已自动恢复）'; log('已自动恢复上次文件夹：' + saved.name); await refreshPreview(); }
+    if (ok) { dirHandle = saved; $('folderPath').textContent = saved.name + ' （已自动恢复）'; updateApplyState(); log('已自动恢复上次文件夹：' + saved.name); await refreshPreview(); }
+    else { $('folderPath').textContent = '上次文件夹权限已失效，请重新选择'; log('上次选择的文件夹写入权限已失效，请重新选择。', C.warn); }
   } catch (e) { console.warn('恢复文件夹失败', e); }
 })();
 function toggleMode() {
@@ -1475,18 +1507,20 @@ function toggleMode() {
   $('tabNumber').classList.toggle('active', mode === 'number');
   $('tabWrap').classList.toggle('active', mode === 'wrap');
   $('tabReplace').classList.toggle('active', mode === 'replace');
-  if (dirHandle) refreshPreview();
+  if (hasItems()) refreshPreview();
 }
 async function collectItems() {
-  if (!dirHandle) {
-    if (looseFiles.length) return looseFiles.map(f => ({ name: f.name, type: 'file' }));
-    return [];
-  }
-  const mode = document.querySelector('input[name=targetMode]:checked').value;
-  const items = [];
-  for await (const entry of dirHandle.values()) {
-    if (entry.kind === 'file' && (mode === 'file' || mode === 'both')) items.push({ name: entry.name, type: 'file' });
-    else if (entry.kind === 'directory' && (mode === 'dir' || mode === 'both')) items.push({ name: entry.name, type: 'directory' });
+  let items = [];
+  if (dirHandle) {
+    const mode = document.querySelector('input[name=targetMode]:checked').value;
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && (mode === 'file' || mode === 'both')) items.push({ name: entry.name, type: 'file' });
+      else if (entry.kind === 'directory' && (mode === 'dir' || mode === 'both')) items.push({ name: entry.name, type: 'directory' });
+    }
+  } else if (fileHandles.length) {
+    items = fileHandles.map(h => ({ name: h.name, type: 'file', handle: h }));
+  } else if (looseFiles.length) {
+    items = looseFiles.map(f => ({ name: f.name, type: 'file' }));
   }
   const sb = $('sortBy').value;
   if (sb === 'name_asc') items.sort((a,b) => a.name.localeCompare(b.name, 'zh'));
@@ -1526,10 +1560,10 @@ function buildNewName(item, index) {
 async function refreshPreview() {
   const oldBox = $('previewOld'), newBox = $('previewNew');
   oldBox.innerHTML = ''; newBox.innerHTML = '';
-  if (!dirHandle && looseFiles.length === 0) { oldBox.innerHTML = '<div class="pv-empty">请先选择文件夹或文件</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); return; }
+  if (!hasItems()) { oldBox.innerHTML = '<div class="pv-empty">请先选择文件夹或文件</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); updateSelCount(); return; }
   const items = await collectItems();
-  if (items.length === 0) { oldBox.innerHTML = '<div class="pv-empty">没有符合条件的项</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); return; }
-  const plan = items.map((it, i) => ({ oldName: it.name, newName: buildNewName(it, i), type: it.type }));
+  if (items.length === 0) { oldBox.innerHTML = '<div class="pv-empty">没有符合条件的项</div>'; newBox.innerHTML = '<div class="pv-empty">—</div>'; setStatus(''); updateSelCount(); return; }
+  const plan = items.map((it, i) => ({ oldName: it.name, newName: buildNewName(it, i), type: it.type, handle: it.handle }));
   const seen = new Set();
   for (const p of plan) {
     p.conflict = false; p.reason = '';
@@ -1541,15 +1575,37 @@ async function refreshPreview() {
     if (seen.has(key)) { p.conflict = true; p.reason = '批次内重名'; }
     seen.add(key);
   }
+  /* 同步勾选状态：清掉已不在列表的名字；用户没动过勾选时默认全选 */
+  const validNames = new Set(plan.map(p => p.oldName));
+  for (const n of selected) if (!validNames.has(n)) selected.delete(n);
+  if (!selectedTouched) plan.forEach(p => selected.add(p.oldName));
   let nConflict = 0, nChanged = 0, nLong = 0;
-  for (const p of plan) {
+  for (let i = 0; i < plan.length; i++) {
+    const p = plan[i];
     const ro = document.createElement('div');
-    ro.className = 'pv-row';
-    ro.textContent = p.oldName;
+    ro.className = 'pv-row' + (p.conflict ? ' warn' : '');
+    ro.dataset.idx = i;
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.className = 'pv-check';
+    cb.dataset.name = p.oldName;
+    cb.checked = selected.has(p.oldName);
+    if (p.conflict) { cb.disabled = true; cb.title = '该项有冲突，执行时自动跳过'; }
+    cb.addEventListener('change', () => {
+      selectedTouched = true;
+      if (cb.checked) selected.add(p.oldName); else selected.delete(p.oldName);
+      updateSelCount();
+      updateStatus();
+    });
+    const sp = document.createElement('span');
+    sp.className = 'pv-name'; sp.textContent = p.oldName;
+    ro.appendChild(cb); ro.appendChild(sp);
+    bindRowHover(ro);
     oldBox.appendChild(ro);
     const rn = document.createElement('div');
     rn.className = 'pv-row' + (p.conflict ? ' warn' : '');
+    rn.dataset.idx = i;
     rn.textContent = p.newName;
+    bindRowHover(rn);
     newBox.appendChild(rn);
     if (p.conflict) nConflict++;
     if (p.newName.length > 255) nLong++;
@@ -1557,8 +1613,40 @@ async function refreshPreview() {
   }
   const lw = $('lenWarn');
   if (nLong > 0) { lw.style.display = ''; lw.textContent = `（${nLong} 项超过255字符）`; } else { lw.style.display = 'none'; }
-  setStatus(`共 ${plan.length} 项，其中 ${nChanged} 项需要改名，${nConflict} 项有冲突（红色，将被跳过）`);
+  updateSelCount();
+  lastPlan = plan;
+  updateStatus();
   return plan;
+}
+function updateStatus() {
+  if (!lastPlan || !lastPlan.length) { setStatus(''); return; }
+  const selN = lastPlan.filter(p => selected.has(p.oldName)).length;
+  const nChanged = lastPlan.filter(p => p.oldName !== p.newName).length;
+  const nConflict = lastPlan.filter(p => p.conflict).length;
+  setStatus(`共 ${lastPlan.length} 项，已选 ${selN} 项，其中 ${nChanged} 项需要改名，${nConflict} 项有冲突（红色，将被跳过）`);
+}
+/* 左右两栏同一行（按 data-idx）联动高亮 */
+function bindRowHover(row) {
+  row.addEventListener('mouseenter', () => {
+    const idx = row.dataset.idx;
+    document.querySelectorAll('.pv-row[data-idx="' + idx + '"]').forEach(r => r.classList.add('pv-hover'));
+  });
+  row.addEventListener('mouseleave', () => {
+    const idx = row.dataset.idx;
+    document.querySelectorAll('.pv-row[data-idx="' + idx + '"]').forEach(r => r.classList.remove('pv-hover'));
+  });
+}
+function updateSelCount() {
+  const c = $('selCount');
+  if (!c) return;
+  const rows = document.querySelectorAll('#previewOld .pv-row');
+  let checked = 0;
+  rows.forEach(r => { const cb = r.querySelector('.pv-check'); if (cb && cb.checked) checked++; });
+  c.textContent = rows.length ? `已选 ${checked}/${rows.length}` : '';
+  const h = $('selectAllCb');
+  h.disabled = rows.length === 0;
+  h.checked = rows.length > 0 && checked === rows.length;
+  h.indeterminate = rows.length > 0 && checked > 0 && checked < rows.length;
 }
 async function copyDirectory(src, dst) {
   for await (const entry of src.values()) {
@@ -1574,38 +1662,82 @@ async function copyDirectory(src, dst) {
     }
   }
 }
-async function renameOne(oldName, newName, type) {
-  if (type === 'file') {
-    const oldFh = await dirHandle.getFileHandle(oldName);
+async function ensureWrite(handle) {
+  if (!handle || typeof handle.queryPermission !== 'function') return true;
+  try {
+    let st = await handle.queryPermission({ mode: 'readwrite' });
+    if (st === 'granted') return true;
+    if (st === 'prompt') {
+      st = await handle.requestPermission({ mode: 'readwrite' });
+      return st === 'granted';
+    }
+  } catch (e) { return false; }
+  return false;
+}
+async function renameOne(item, targetName) {
+  /* 选择文件（句柄）模式：直接用句柄原地改名（Chrome/Edge 的 File System Access API） */
+  if (item.handle) {
+    if (typeof item.handle.move !== 'function') throw new Error('当前浏览器不支持文件句柄原地改名');
+    try {
+      await item.handle.move(targetName);
+    } catch (e) {
+      /* 权限不足：请求一次写入授权后重试 */
+      const ok = await ensureWrite(item.handle);
+      if (!ok) throw new Error('未获得写入授权，无法原地改名（请允许授权，或改用「选择文件夹」）');
+      await item.handle.move(targetName);
+    }
+    return;
+  }
+  /* 当前文件名：apply 传 plan 项（oldName），undo 传记录项（name），统一取值 */
+  const cur = item.oldName !== undefined ? item.oldName : item.name;
+  if (item.type === 'file') {
+    const oldFh = await dirHandle.getFileHandle(cur);
     const file = await oldFh.getFile();
     const buf = await file.arrayBuffer();
-    const newFh = await dirHandle.getFileHandle(newName, { create: true });
+    const newFh = await dirHandle.getFileHandle(targetName, { create: true });
     const w = await newFh.createWritable();
     try { await w.write(buf); } finally { await w.close(); }
-    await dirHandle.removeEntry(oldName);
+    await dirHandle.removeEntry(cur);
   } else {
-    const oldDir = await dirHandle.getDirectoryHandle(oldName);
-    const newDir = await dirHandle.getDirectoryHandle(newName, { create: true });
+    const oldDir = await dirHandle.getDirectoryHandle(cur);
+    const newDir = await dirHandle.getDirectoryHandle(targetName, { create: true });
     await copyDirectory(oldDir, newDir);
-    await dirHandle.removeEntry(oldName, { recursive: true });
+    await dirHandle.removeEntry(cur, { recursive: true });
   }
 }
 async function apply() {
+  if (!hasItems()) { log('请先选择文件夹或文件', C.err); return; }
+  if (!dirHandle && fileHandles.length === 0) {
+    log('拖入/只读导入的文件无法原地改名（浏览器安全限制），请用「选择文件」按钮导入（可授权原地改名），或「选择文件夹…」。', C.err);
+    showTip('当前导入方式无法原地改名，请改用「选择文件」或「选择文件夹」');
+    return;
+  }
   const plan = await refreshPreview();
   if (!plan || plan.length === 0) return;
-  const conflicts = plan.filter(p => p.conflict);
+  const chosen = plan.filter(p => selected.has(p.oldName));
+  if (!chosen.length) { log('未勾选任何文件，请先在预览中勾选要改名的文件。', C.warn); return; }
+  /* 句柄模式：在用户手势内先对第一个待处理文件请求一次写入授权 */
+  if (!dirHandle) {
+    const first = chosen.find(p => p.handle && !p.conflict && p.oldName !== p.newName);
+    if (first) {
+      const ok = await ensureWrite(first.handle);
+      if (!ok) { log('未获得写入授权，无法原地改名。请允许授权，或改用「选择文件夹」。', C.err); showTip('请允许写入授权，或改用「选择文件夹」'); return; }
+      log('已获得写入授权，开始处理…', C.ok);
+    }
+  }
+  const conflicts = chosen.filter(p => p.conflict);
   if (conflicts.length > 0) log(`⚠ 有 ${conflicts.length} 项存在冲突，将自动跳过：${conflicts.map(p=>p.oldName).join('、')}`, C.warn);
   let done = 0, skipped = 0; const errors = [];
-  for (const p of plan) {
+  for (const p of chosen) {
     if (p.conflict) { skipped++; continue; }
     if (p.oldName === p.newName) { done++; continue; }
     try {
       log(`处理：${p.oldName}  →  ${p.newName}`, C.info);
-      await renameOne(p.oldName, p.newName, p.type);
-      lastUndo.push({ oldName: p.newName, newName: p.oldName, type: p.type });
+      await renameOne(p, p.newName);
+      lastUndo.push({ name: p.newName, type: p.type, handle: p.handle, target: p.oldName });
       done++;
     } catch (e) {
-      const msg = `${p.oldName}: ${e.name} - ${e.message}`;
+      const msg = friendlyError(p, e);
       log('失败: ' + msg, C.err); errors.push(msg);
     }
   }
@@ -1613,19 +1745,73 @@ async function apply() {
   else log(`✓ 完成：成功 ${done} 项，跳过 ${skipped} 项。可点「撤销上次」回滚。`, C.ok);
   await refreshPreview();
 }
+function friendlyError(p, e) {
+  const n = (e && e.name) || '';
+  const msg = (e && e.message) || String(e);
+  if (/securityerror|notallowederror/i.test(n) && /permission|gesture|write/i.test(msg + n)) return `${p.oldName}: 无写入权限，请重新选择并允许授权，或改用「选择文件夹」`;
+  if (/securityerror|notallowederror/i.test(n)) return `${p.oldName}: 无写入权限（请允许授权，或改用「选择文件夹」）`;
+  if (/invalidmodificationerror|nomodificationallowederror/i.test(n)) return `${p.oldName}: 目标文件已存在或无法修改，请调整命名规则`;
+  return `${p.oldName}: ${n} - ${msg}`;
+}
 async function undo() {
   if (lastUndo.length === 0) { log('没有可撤销的操作。', C.warn); return; }
   let done = 0, failed = 0;
   for (let i = lastUndo.length - 1; i >= 0; i--) {
     const u = lastUndo[i];
-    try { log(`撤销：${u.oldName}  →  ${u.newName}`, C.info); await renameOne(u.oldName, u.newName, u.type); done++; }
-    catch (e) { failed++; log('撤销失败 ' + u.oldName + ': ' + e.message, C.err); }
+    try { log(`撤销：${u.name}  →  ${u.target}`, C.info); await renameOne(u, u.target); done++; }
+    catch (e) { failed++; log('撤销失败 ' + u.name + ': ' + e.message, C.err); }
   }
   lastUndo = []; await refreshPreview();
   log(`✓ 已撤销 ${done} 项，失败 ${failed} 项。`, failed ? C.err : C.ok);
 }
+/* 只读导入（拖入等）无法原地改名：将勾选文件的改名结果打包为 ZIP 下载 */
+async function exportRenamedZip() {
+  const plan = await refreshPreview();
+  if (!plan || plan.length === 0) return;
+  const chosen = plan.filter(p => selected.has(p.oldName));
+  if (!chosen.length) { log('未勾选任何文件，请先勾选要导出的文件。', C.warn); return; }
+  const fileMap = {};
+  looseFiles.forEach(f => { fileMap[f.name] = f; });
+  const zip = new JSZip();
+  let added = 0;
+  for (const p of chosen) {
+    if (p.conflict || p.oldName === p.newName) continue;
+    const f = fileMap[p.oldName];
+    if (!f) continue;
+    zip.file(p.newName, f);
+    added++;
+  }
+  if (!added) { log('没有可导出的文件（未改名或未找到源文件）', C.warn); return; }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '改名文件_' + new Date().toISOString().slice(0, 10) + '.zip';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  log(`✓ 已打包导出 ${added} 个改名后的文件（ZIP），可解压使用。`, C.ok);
+}
 $('pickBtn').onclick = pickFolder;
-$('pickFilesBtn').onclick = () => {
+$('pickFilesBtn').onclick = async () => {
+  /* 优先走 showOpenFilePicker：导入零弹窗，执行重命名时一次性授权写入，即可原地改名 */
+  if ('showOpenFilePicker' in window) {
+    try {
+      const handles = await window.showOpenFilePicker({ multiple: true });
+      if (!handles.length) return;
+      fileHandles = Array.from(handles); dirHandle = null; looseFiles = [];
+      $('folderPath').textContent = handles.length + ' 个文件（执行重命名时授权写入）';
+      lastUndo = [];
+      updateApplyState();
+      log('已选择 ' + handles.length + ' 个文件，可预览命名；点「执行重命名」时只需授权一次即可原地改名。', C.ok);
+      refreshPreview();
+      return;
+    } catch (e) {
+      if (e.name !== 'AbortError') log('选择文件出错：' + e.message, C.err);
+      return;
+    }
+  }
+  openFileInput();
+};
+function openFileInput() {
   let inp = document.getElementById('rnFileInput');
   if (!inp) {
     inp = document.createElement('input');
@@ -1635,26 +1821,75 @@ $('pickFilesBtn').onclick = () => {
     document.body.appendChild(inp);
   }
   inp.value = ''; inp.click();
-};
+}
+function updateApplyState() {
+  const ok = !!(dirHandle || fileHandles.length);
+  $('applyBtn').disabled = !ok;
+  $('applyBtn').title = ok ? '执行重命名' : '原地重命名需选择文件夹，或用「选择文件」导入';
+  /* 只读导入（拖入等）时提供「导出改名 ZIP」替代方案 */
+  const onlyRead = !dirHandle && fileHandles.length === 0 && looseFiles.length > 0;
+  $('exportZipBtn').style.display = onlyRead ? '' : 'none';
+}
 function loadLooseFiles(fileList) {
   const files = Array.from(fileList).filter(f => !/\.zip$/i.test(f.name));
   if (!files.length) { showTip('未选择有效文件'); return; }
-  dirHandle = null;
+  dirHandle = null; fileHandles = [];
   looseFiles = files;
-  $('folderPath').textContent = files.length + ' 个文件（来自直接选择）';
+  $('folderPath').textContent = files.length + ' 个文件（只读，仅预览）';
   lastUndo = [];
-  log('已载入 ' + files.length + ' 个文件，可预览命名；原地改名请改选所在文件夹');
+  updateApplyState();
+  log('已载入 ' + files.length + ' 个文件（拖入/只读导入，可预览或「导出改名 ZIP」；原地改名请用「选择文件」授权或「选择文件夹」）');
   refreshPreview();
 }
 $('rnClearBtn').onclick = () => {
-  dirHandle = null; looseFiles = [];
-  $('folderPath').textContent = '未选择（点上方按钮选择）';
+  dirHandle = null; fileHandles = []; looseFiles = [];
+  $('folderPath').textContent = '未选择（点上方按钮选择，或直接拖入文件）';
+  updateApplyState();
   refreshPreview();
   log('已清空');
 };
+/* R1 拖放文件导入（拖放拿不到文件句柄，按只读载入，可预览命名） */
+(function initDropZone(){
+  const dz = $('folderPath');
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault();
+    dz.classList.add('drop-hover');
+  }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault();
+    dz.classList.remove('drop-hover');
+  }));
+  dz.addEventListener('drop', e => {
+    const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+    if (files.length) loadLooseFiles(files);
+    else showTip('未识别到拖入的文件');
+  });
+})();
 $('refreshBtn').onclick = refreshPreview;
 $('applyBtn').onclick = apply;
 $('undoBtn').onclick = undo;
+$('exportZipBtn').onclick = exportRenamedZip;
+updateApplyState();
+/* R3 勾选：表头小选框 = 全选/全不选 */
+$('selectAllCb').addEventListener('change', () => {
+  selectedTouched = true;
+  const on = $('selectAllCb').checked;
+  document.querySelectorAll('#previewOld .pv-row').forEach(r => {
+    const cb = r.querySelector('.pv-check');
+    if (cb && !cb.disabled) cb.checked = on;
+  });
+  if (on) {
+    document.querySelectorAll('#previewOld .pv-row').forEach(r => {
+      const cb = r.querySelector('.pv-check');
+      if (cb && !cb.disabled) selected.add(cb.dataset.name);
+    });
+  } else {
+    selected.clear();
+  }
+  updateSelCount();
+  updateStatus();
+  log(on ? '已全选预览中的文件' : '已取消全部勾选', C.info);
+});
 // R3 左右双栏同步垂直滚动
 (function(){
   const a = $('previewOld'), b = $('previewNew');
@@ -1666,7 +1901,7 @@ document.querySelectorAll('input[name=renameMode]').forEach(r => r.onchange = to
 let _refreshTimer = null;
 function scheduleRefresh(){
   clearTimeout(_refreshTimer);
-  _refreshTimer = setTimeout(() => { if (dirHandle || looseFiles.length) refreshPreview(); }, 150);
+  _refreshTimer = setTimeout(() => { if (hasItems()) refreshPreview(); }, 150);
 }
 ['prefix','suffix','startNum','digits','keepExt','sortBy','findText','replaceText','caseSensitive','wrapPrefix','wrapSuffix'].forEach(id => {
   $(id).addEventListener('input', scheduleRefresh);
@@ -1691,16 +1926,16 @@ function checkBoth(ids, warnEl){
   } else {
     warnEl.style.display = 'none';
   }
-  if (dirHandle || looseFiles.length) scheduleRefresh();
+  if (hasItems()) scheduleRefresh();
 }
 ['wrapPrefix','wrapSuffix'].forEach(id => $(id).addEventListener('input', () => checkBoth(['wrapPrefix','wrapSuffix'], $('wrapWarn'))));
 // 编号模式 前缀/后缀
 ['prefix','suffix'].forEach(id => $(id).addEventListener('input', () => checkBoth(['prefix','suffix'], $('numWarn'))));
 // 查找替换 替换为
 $('replaceText').addEventListener('input', () => checkIllegal('replaceText', $('repWarn')));
-document.querySelectorAll('input[name=targetMode]').forEach(r => r.onchange = () => { if (dirHandle) refreshPreview(); });
+document.querySelectorAll('input[name=targetMode]').forEach(r => r.onchange = () => { if (hasItems()) refreshPreview(); });
 document.querySelectorAll('#tab-rename .quick-tag').forEach(btn => {
-  btn.addEventListener('click', () => { $('prefix').value = btn.dataset.prefix; if (dirHandle) refreshPreview(); });
+  btn.addEventListener('click', () => { $('prefix').value = btn.dataset.prefix; if (hasItems()) refreshPreview(); });
 });
 document.addEventListener('keydown', (e) => {
   const tag = (document.activeElement && document.activeElement.tagName) || '';
@@ -2812,6 +3047,7 @@ const FONT = "-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','
 const state = {
   image: DEFAULT_IMG,       // 当前白底图 dataURL
   imgMode: 'contain',       // contain | cover
+  imgZoom: 1,               // 白底图缩放（预览区滚轮调整，0.5~2.5）
   bg: '#ffffff',            // 背景层颜色（可自定义，默认白色）
   cardBg: '#f5f5f5',        // 表格区背景底色（固定浅灰，与上部背景区分开，不可自定义）
   titleEn: 'PARAMETER',     // 固定模板内容
@@ -2922,12 +3158,13 @@ function drawValueSpaced(ctx, text, rightX, y, spacing){
   });
 }
 
-/* 按比例绘制图片（contain / cover） */
-function drawImageFit(ctx, img, box, mode){
+/* 按比例绘制图片（contain / cover），zoom 为缩放系数（1=默认，保持中心缩放） */
+function drawImageFit(ctx, img, box, mode, zoom){
+  zoom = zoom || 1;
   const s = mode === 'cover'
     ? Math.max(box.w / img.width, box.h / img.height)
     : Math.min(box.w / img.width, box.h / img.height);
-  const dw = img.width * s, dh = img.height * s;
+  const dw = img.width * s * zoom, dh = img.height * s * zoom;
   const dx = box.x + (box.w - dw) / 2, dy = box.y + (box.h - dh) / 2;
   ctx.save();
   ctx.beginPath(); ctx.rect(box.x, box.y, box.w, box.h); ctx.clip();
@@ -2952,7 +3189,7 @@ function drawTo(c, W, H){
      图片按 contain 等比适配，避免拉伸变形 */
   const box = { x: 140 * sx, y: 310 * sy, w: 470 * sx, h: 282 * sy };
   if(imgObj && imgObj.complete && imgObj.naturalWidth > 0){
-    drawImageFit(ctx, imgObj, box, state.imgMode);
+    drawImageFit(ctx, imgObj, box, state.imgMode, state.imgZoom);
   } else {
     ctx.save();
     ctx.strokeStyle = '#c9cdd3';
@@ -3073,6 +3310,30 @@ function setImage(src, thumb){
   });
 }
 
+/* 白底图大小：预览区滚轮缩放（50%~250%），双击恢复 100% */
+function updateZoomBadge(){
+  const el = document.getElementById('dtZoomBadge');
+  if(el) el.textContent = '白底图 ' + Math.round(state.imgZoom * 100) + '%';
+}
+(function(){
+  const stage = document.querySelector('.dt-stage');
+  if(!stage) return;
+  stage.addEventListener('wheel', function(e){
+    e.preventDefault();
+    const step = e.deltaY < 0 ? 0.05 : -0.05;
+    state.imgZoom = Math.min(2.5, Math.max(0.5, +(state.imgZoom + step).toFixed(2)));
+    render();
+    updateZoomBadge();
+  }, { passive:false });
+  stage.addEventListener('dblclick', function(){
+    state.imgZoom = 1;
+    render();
+    updateZoomBadge();
+    dtLog('白底图已恢复 100%', DT_C.info);
+  });
+  updateZoomBadge();
+})();
+
 /* ================= 控制面板事件 ================= */
 const $ = function(id){ return document.getElementById(id); };
 
@@ -3091,7 +3352,9 @@ $('imgInput').addEventListener('change', function(e){
 });
 $('resetImgBtn').addEventListener('click', function(){
   state.image = DEFAULT_IMG;
+  state.imgZoom = 1;
   setImage(DEFAULT_IMG, true);
+  updateZoomBadge();
   dtLog('已恢复默认白底图', DT_C.info);
 });
 
