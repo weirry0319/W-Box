@@ -1114,7 +1114,7 @@ body.dark #tab-detail .dt-stage{
           <button id="pickBtn" class="im-btn primary">选择文件夹…</button>
           <button id="pickFilesBtn" class="im-btn">选择文件</button>
           <button id="rnClearBtn" class="im-btn">清空</button>
-          <span class="folder-path" id="folderPath">未选择（点上方按钮选择，或直接拖入文件）</span>
+          <span class="folder-path" id="folderPath">未选择（点上方按钮选择；或直接拖入文件/文件夹）</span>
         </div>
       </div>
     </div>
@@ -1408,8 +1408,10 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
 
 <script>
 // ===== 重命名工具 =====
-let dirHandle = null;
-let fileHandles = [];  // 选择文件（showOpenFilePicker）拿到的可写句柄，支持原地改名
+let dirHandle = null;          // 「选择文件夹」授权目录句柄
+let authDirHandle = null;      // 拖放授权的目录句柄（IndexedDB 持久化，供「选择文件」原地改名用）
+let authDirFound = new Set();  // 授权目录中匹配到的导入文件名
+let fileHandles = [];          // 「选择文件」导入的文件句柄（预览与改名目标）
 let looseFiles = [];   // 回退：只读 File 对象（浏览器不支持句柄时，仅预览）
 let lastUndo = [];
 function hasItems(){ return !!(dirHandle || fileHandles.length || looseFiles.length); }
@@ -1462,6 +1464,27 @@ async function loadDirHandle() {
     });
   } catch (e) { return null; }
 }
+async function saveAuthDirHandle(handle) {
+  try {
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').put(handle, 'authDir');
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+  } catch (e) { console.warn('保存授权文件夹失败', e); }
+}
+async function loadAuthDirHandle() {
+  try {
+    const db = await openDB();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction('handles', 'readonly');
+      const req = tx.objectStore('handles').get('authDir');
+      req.onsuccess = () => res(req.result || null);
+      req.onerror = () => rej(req.error);
+    });
+  } catch (e) { return null; }
+}
 async function ensurePermission(handle) {
   if (handle.queryPermission) {
     const st = await handle.queryPermission({ mode: 'readwrite' });
@@ -1478,13 +1501,14 @@ async function pickFolder() {
   if (!('showDirectoryPicker' in window)) { showTip('当前浏览器不支持此功能，请用 Chrome 或 Edge 打开。'); return; }
   try {
     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    fileHandles = []; looseFiles = [];
     const ok = await ensurePermission(dirHandle);
     await saveDirHandle(dirHandle);
     $('folderPath').textContent = dirHandle.name + (ok ? ' （已授权读写）' : ' （未获写入授权，仅预览）');
     lastUndo = [];
     updateApplyState();
     if (!ok) log('未获得该文件夹的写入授权，只能预览，无法原地改名。', C.warn);
-    else log('已选择文件夹：' + dirHandle.name);
+    else log('已选择文件夹：' + dirHandle.name + '（目录内全部文件可原地改名）');
     await refreshPreview();
   } catch (e) {
     if (e.name !== 'AbortError') log('选择文件夹出错：' + e.message, C.err);
@@ -1495,9 +1519,18 @@ async function pickFolder() {
     const saved = await loadDirHandle();
     if (!saved) return;
     const ok = await ensurePermission(saved);
-    if (ok) { dirHandle = saved; $('folderPath').textContent = saved.name + ' （已自动恢复）'; updateApplyState(); log('已自动恢复上次文件夹：' + saved.name); await refreshPreview(); }
+    if (ok) { dirHandle = saved; fileHandles = []; looseFiles = []; $('folderPath').textContent = saved.name + ' （已自动恢复）'; updateApplyState(); log('已自动恢复上次文件夹：' + saved.name); await refreshPreview(); }
     else { $('folderPath').textContent = '上次文件夹权限已失效，请重新选择'; log('上次选择的文件夹写入权限已失效，请重新选择。', C.warn); }
   } catch (e) { console.warn('恢复文件夹失败', e); }
+})();
+/* 自动恢复拖放授权的文件夹：授权一次之后，刷新页面 / 重新导入 / 执行 / 撤销均零弹窗 */
+(async function restoreAuthDir() {
+  try {
+    const saved = await loadAuthDirHandle();
+    if (!saved) return;
+    const ok = await ensurePermission(saved);
+    if (ok) { authDirHandle = saved; log('已恢复授权文件夹，「选择文件」导入后可直接原地改名（零弹窗）。', C.ok); }
+  } catch (e) { console.warn('恢复授权文件夹失败', e); }
 })();
 function toggleMode() {
   const mode = document.querySelector('input[name=renameMode]:checked').value;
@@ -1692,7 +1725,7 @@ async function renameOne(item, targetName, parent) {
 async function apply() {
   if (!hasItems()) { log('请先选择文件夹或文件', C.err); return; }
   if (!dirHandle && fileHandles.length === 0) {
-    log('拖入/只读导入的文件无法原地改名（浏览器安全限制），请用「选择文件」按钮导入（可授权原地改名），或「选择文件夹…」。', C.err);
+    log('拖入/只读导入的文件无法原地改名（浏览器安全限制），请用「选择文件」或「选择文件夹」导入。', C.err);
     showTip('当前导入方式无法原地改名，请改用「选择文件」或「选择文件夹」');
     return;
   }
@@ -1702,57 +1735,27 @@ async function apply() {
   if (!chosen.length) { log('未勾选任何文件，请先在预览中勾选要改名的文件。', C.warn); return; }
   const conflicts = chosen.filter(p => p.conflict);
   if (conflicts.length > 0) log(`⚠ 有 ${conflicts.length} 项存在冲突，将自动跳过：${conflicts.map(p=>p.oldName).join('、')}`, C.warn);
-  let done = 0, skipped = 0; const errors = []; const needDir = [];
-  /* 第一轮：文件夹模式用已授权的目录句柄改名（零弹窗）；选择文件模式用句柄 move()（新版 Chrome 只需只读权限，零弹窗零选择） */
+  let done = 0, skipped = 0; const errors = [];
+  /* 文件夹模式：目录句柄批量原地改名；文件模式：文件句柄原地改名（导入时已授权，仅个别未授权时弹「允许此站点编辑文件?」补授权） */
   for (const p of chosen) {
     if (p.conflict) { skipped++; continue; }
     if (p.oldName === p.newName) { done++; continue; }
     try {
       log(`处理：${p.oldName}  →  ${p.newName}`, C.info);
       if (dirHandle) {
+        /* 文件夹导入：用已授权目录句柄改名 */
         await renameOne(p, p.newName, dirHandle);
         lastUndo.push({ name: p.newName, type: p.type, handle: p.handle, target: p.oldName, parent: dirHandle });
-        done++;
-      } else if (p.handle && typeof p.handle.move === 'function') {
-        await p.handle.move(p.newName);
-        lastUndo.push({ name: p.newName, type: p.type, handle: p.handle, target: p.oldName });
-        done++;
       } else {
-        throw new Error('当前浏览器不支持原地改名，请改用「选择文件夹」');
+        /* 选择文件导入：用已授权目录（拖放授权/「选择文件夹」授权）在文件原位置原地改名，零弹窗 */
+        if (!authDirHandle || !authDirFound.has(p.oldName)) {
+          throw new Error('该文件未授权：请把文件所在文件夹拖到上方虚线框授权一次（或点「选择文件夹」），授权仅一次，之后零弹窗');
+        }
+        await renameOne(p, p.newName, authDirHandle);
+        lastUndo.push({ name: p.newName, type: p.type, handle: p.handle, target: p.oldName, parent: authDirHandle });
       }
-    } catch (e) {
-      if (/securityerror|notallowederror/i.test(e.name)) needDir.push(p); /* 权限受限 → 统一授权目录处理 */
-      else { const msg = friendlyError(p, e); errors.push(msg); log('失败: ' + msg, C.err); }
-    }
-  }
-  /* 第二轮：存在权限失败项（旧版 Chrome 的 move 需要写权限）→ 只弹一次文件夹选择器授权，用目录句柄统一处理，绝不逐个确认 */
-  if (needDir.length) {
-    let d = dirHandle;
-    if (!d) {
-      try { d = await window.showDirectoryPicker({ mode: 'readwrite' }); }
-      catch (e) {
-        if (e.name !== 'AbortError') log('选择文件夹出错：' + e.message, C.err);
-        else log(`已取消授权文件夹，以下 ${needDir.length} 项未改名：${needDir.map(p=>p.oldName).join('、')}`, C.warn);
-      }
-    }
-    if (d) {
-      log(`当前浏览器版本需要一次文件夹授权（仅选择一次），已就绪，处理 ${needDir.length} 个文件…`, C.info);
-      const names = new Set(needDir.map(p => p.oldName));
-      const found = new Set();
-      for await (const entry of d.values()) if (entry.kind === 'file' && names.has(entry.name)) found.add(entry.name);
-      needDir.filter(p => !found.has(p.oldName)).forEach(p => errors.push(`${p.oldName}: 所选文件夹中未找到该文件，请选择正确的文件夹`));
-      for (const p of needDir) {
-        if (!found.has(p.oldName)) continue;
-        try {
-          log(`处理：${p.oldName}  →  ${p.newName}`, C.info);
-          await renameOne(p, p.newName, d);
-          lastUndo.push({ name: p.newName, type: p.type, handle: p.handle, target: p.oldName, parent: d });
-          done++;
-        } catch (e2) { const msg = friendlyError(p, e2); errors.push(msg); log('失败: ' + msg, C.err); }
-      }
-    } else {
-      needDir.forEach(p => errors.push(`${p.oldName}: 未授权，无法改名`));
-    }
+      done++;
+    } catch (e) { const msg = friendlyError(p, e); errors.push(msg); log('失败: ' + msg, C.err); }
   }
   if (errors.length) log(`✗ 完成：成功 ${done} 项，跳过 ${skipped} 项，出错 ${errors.length} 项`, C.err);
   else log(`✓ 完成：成功 ${done} 项，跳过 ${skipped} 项。可点「撤销上次」回滚。`, C.ok);
@@ -1761,8 +1764,8 @@ async function apply() {
 function friendlyError(p, e) {
   const n = (e && e.name) || '';
   const msg = (e && e.message) || String(e);
-  if (/securityerror|notallowederror/i.test(n) && /permission|gesture|write/i.test(msg + n)) return `${p.oldName}: 无写入权限，请重新选择并允许授权，或改用「选择文件夹」`;
-  if (/securityerror|notallowederror/i.test(n)) return `${p.oldName}: 无写入权限（请允许授权，或改用「选择文件夹」）`;
+  if (/securityerror|notallowederror/i.test(n) && /permission|gesture|write/i.test(msg + n)) return `${p.oldName}: 未获得编辑权限（请在弹出的「允许此站点编辑文件?」中点击「允许」），或改用「选择文件夹」`;
+  if (/securityerror|notallowederror/i.test(n)) return `${p.oldName}: 未获得编辑权限（请在弹窗中点「允许」），或改用「选择文件夹」`;
   if (/invalidmodificationerror|nomodificationallowederror/i.test(n)) return `${p.oldName}: 目标文件已存在或无法修改，请调整命名规则`;
   return `${p.oldName}: ${n} - ${msg}`;
 }
@@ -1771,8 +1774,21 @@ async function undo() {
   let done = 0, failed = 0;
   for (let i = lastUndo.length - 1; i >= 0; i--) {
     const u = lastUndo[i];
-    try { log(`撤销：${u.name}  →  ${u.target}`, C.info); await renameOne(u, u.target); done++; }
-    catch (e) { failed++; log('撤销失败 ' + u.name + ': ' + e.message, C.err); }
+    try {
+      log(`撤销：${u.name}  →  ${u.target}`, C.info);
+      if (u.parent) {
+        /* 文件夹模式：用目录句柄改回 */
+        await renameOne(u, u.target, u.parent);
+      } else if (u.handle) {
+        /* 选择文件模式：用授权目录句柄改回 */
+        if (!u.parent) throw new Error('缺少授权目录，无法撤销');
+        await renameOne(u, u.target, u.parent);
+      } else {
+        await renameOne(u, u.target);
+      }
+      done++;
+    }
+    catch (e) { failed++; log('撤销失败 ' + u.name + ': ' + (e.message || e), C.err); }
   }
   lastUndo = []; await refreshPreview();
   log(`✓ 已撤销 ${done} 项，失败 ${failed} 项。`, failed ? C.err : C.ok);
@@ -1804,26 +1820,38 @@ async function exportRenamedZip() {
   log(`✓ 已打包导出 ${added} 个改名后的文件（ZIP），可解压使用。`, C.ok);
 }
 $('pickBtn').onclick = pickFolder;
-$('pickFilesBtn').onclick = async () => {
-  /* 优先走 showOpenFilePicker：导入零弹窗，执行重命名时一次性授权写入，即可原地改名 */
-  if ('showOpenFilePicker' in window) {
-    try {
-      const handles = await window.showOpenFilePicker({ multiple: true });
-      if (!handles.length) return;
-      fileHandles = Array.from(handles); dirHandle = null; looseFiles = [];
-      $('folderPath').textContent = handles.length + ' 个文件（可直接原地改名）';
-      lastUndo = [];
-      updateApplyState();
-      log('已选择 ' + handles.length + ' 个文件（一次选择即可，无需逐个确认）；点「执行重命名」直接原地改名。', C.ok);
-      refreshPreview();
-      return;
-    } catch (e) {
-      if (e.name !== 'AbortError') log('选择文件出错：' + e.message, C.err);
-      return;
+/* ===== 「选择文件」导入（重建）=====
+   选择文件 → 零弹窗导入；若已有授权文件夹（拖放授权 / 「选择文件夹」授权，IndexedDB 记住）则自动匹配，执行时直接原位置改名。
+   首次无授权时：把文件所在文件夹拖到上方虚线框授权一次（浏览器只弹「允许此站点编辑文件?」，绝不弹「选择保存位置」），之后永不弹窗。 */
+$('pickFilesBtn').onclick = pickFilesByHandle;
+async function pickFilesByHandle() {
+  if (!('showOpenFilePicker' in window)) { openFileInput(); return; }
+  try {
+    const handles = await window.showOpenFilePicker({ multiple: true });
+    if (!handles.length) return;
+    dirHandle = null; looseFiles = []; lastUndo = [];
+    fileHandles = Array.from(handles);
+    /* 自动匹配已授权文件夹（IndexedDB 恢复或本次拖放授权），执行时直接原地改名 */
+    let matched = 0;
+    if (authDirHandle) {
+      authDirFound = new Set();
+      for await (const entry of authDirHandle.values()) {
+        if (entry.kind === 'file' && fileHandles.some(h => h.name === entry.name)) authDirFound.add(entry.name);
+      }
+      matched = authDirFound.size;
+    } else {
+      authDirFound = new Set();
     }
+    $('folderPath').textContent = fileHandles.length + ' 个文件' + (matched ? `（已授权 ${matched} 个，可直接原地改名）` : '（待授权）');
+    updateApplyState();
+    if (matched) log(`✓ 已导入 ${fileHandles.length} 个文件，其中 ${matched} 个已获授权，可直接在原地覆盖改名（零弹窗、无导出）。`, C.ok);
+    else log(`已导入 ${fileHandles.length} 个文件：首次使用需授权一次（浏览器安全要求，仅一次）。请把文件所在文件夹拖到上方虚线框，或点「选择文件夹」授权；之后执行重命名将直接在原位置覆盖改名，永不弹窗。`, C.warn);
+    refreshPreview();
+  } catch (e) {
+    if (e.name !== 'AbortError') log('选择文件出错：' + e.message, C.warn);
+    openFileInput(); /* 降级：只读导入，不影响预览与导出功能 */
   }
-  openFileInput();
-};
+}
 function openFileInput() {
   let inp = document.getElementById('rnFileInput');
   if (!inp) {
@@ -1851,12 +1879,12 @@ function loadLooseFiles(fileList) {
   $('folderPath').textContent = files.length + ' 个文件（只读，仅预览）';
   lastUndo = [];
   updateApplyState();
-  log('已载入 ' + files.length + ' 个文件（拖入/只读导入，可预览或「导出改名 ZIP」；原地改名请用「选择文件」授权或「选择文件夹」）');
+  log('已载入 ' + files.length + ' 个文件（拖入/只读导入，可预览或「导出改名 ZIP」；原地改名请用「选择文件」或「选择文件夹」）');
   refreshPreview();
 }
 $('rnClearBtn').onclick = () => {
   dirHandle = null; fileHandles = []; looseFiles = [];
-  $('folderPath').textContent = '未选择（点上方按钮选择，或直接拖入文件）';
+  $('folderPath').textContent = '未选择（点上方按钮选择；或直接拖入文件/文件夹）';
   updateApplyState();
   refreshPreview();
   log('已清空');
@@ -1872,8 +1900,42 @@ $('rnClearBtn').onclick = () => {
     e.preventDefault();
     dz.classList.remove('drop-hover');
   }));
-  dz.addEventListener('drop', e => {
-    const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+  dz.addEventListener('drop', async e => {
+    const dt = e.dataTransfer;
+    if (!dt) { showTip('未识别到拖入的文件'); return; }
+    /* 优先：拖入的是文件夹 → 授权目录（浏览器只弹「允许此站点编辑文件?」，绝不弹「选择保存位置」；授权记住，之后永不弹） */
+    if (dt.items && dt.items[0] && typeof dt.items[0].getAsFileSystemHandle === 'function') {
+      try {
+        const handle = await dt.items[0].getAsFileSystemHandle();
+        if (handle && handle.kind === 'directory') {
+          const ok = await ensurePermission(handle);
+          if (ok) {
+            authDirHandle = handle; authDirFound = new Set();
+            saveAuthDirHandle(handle);
+            if (fileHandles.length) {
+              for await (const entry of handle.values()) {
+                if (entry.kind === 'file' && fileHandles.some(h => h.name === entry.name)) authDirFound.add(entry.name);
+              }
+              $('folderPath').textContent = fileHandles.length + ' 个文件（已授权 ' + authDirFound.size + ' 个，可直接原地改名）';
+              log(`✓ 已授权文件夹「${handle.name}」（仅这一次，已记住），匹配到 ${authDirFound.size} 个导入文件，可直接原地覆盖改名（零弹窗）。`, C.ok);
+            } else {
+              log(`✓ 已授权文件夹「${handle.name}」（仅这一次，已记住，之后不再弹窗）。现在点「选择文件」导入该文件夹的文件，即可直接原地改名。`, C.ok);
+            }
+            updateApplyState();
+            refreshPreview();
+            return;
+          } else {
+            log('未获得该文件夹的编辑权限，无法原地改名；可改用「选择文件夹」按钮。', C.warn);
+            return;
+          }
+        }
+      } catch (err) {
+        log('读取拖入的文件夹失败：' + err.message, C.warn);
+        /* 继续按文件拖入处理 */
+      }
+    }
+    /* 否则：拖入的是文件 → 只读载入（可预览 / 导出改名 ZIP） */
+    const files = dt.files ? Array.from(dt.files) : [];
     if (files.length) loadLooseFiles(files);
     else showTip('未识别到拖入的文件');
   });
