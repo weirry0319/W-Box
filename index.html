@@ -3289,7 +3289,9 @@ function drawTo(c, W, H){
   const valueMaxW = (valueRight - labelX) * 0.98;
   const fontPx = Math.max(12, 20 * sx);
   const line0 = 719.5 * sy;
-  const pitch = 50 * sy;
+  /* 行距与字号同步缩放（不再按高度 sy 独立缩放），保证任何导出尺寸下文字上下间距与 1080×1920 参考密度一致：
+     53.3 = 50 × (1920/1251) ÷ (1080/750)，即把基准行距换算成「随字号」的比例，行距/字号恒为 2.665 */
+  const pitch = 53.3 * (fontPx / 20);
   const labelFont = '400 ' + fontPx + 'px ' + FONT;
   const valueFont = '400 ' + fontPx + 'px ' + FONT;
 
@@ -3461,20 +3463,9 @@ function renderRows(){
 
     const val = document.createElement('textarea');
     val.className = 'val'; val.rows = 2;
-    val.placeholder = row.unit ? '尺寸数字，失焦自动加 mm，如 30*6' : '内容（可多行）';
+    val.placeholder = row.unit ? '尺寸数字，如 30*6' : '内容（可多行）';
     val.value = row.value;
     val.addEventListener('input', function(){ row.value = this.value; scheduleRender(); });
-    if(row.unit){
-      /* 尺寸行：失焦时自动补上 mm 单位 */
-      val.addEventListener('blur', function(){
-        const v = row.value;
-        if(v && v.trim() && !/mm\s*$/i.test(v.trim())){
-          row.value = v + 'mm';
-          val.value = row.value;
-          scheduleRender();
-        }
-      });
-    }
 
     rowEl.appendChild(lbl); rowEl.appendChild(val);
 
