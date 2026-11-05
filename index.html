@@ -694,6 +694,14 @@ body.dark #tab-detail .dt-stage{
 #tab-detail .sec-title::before{content:""; width:4px; height:13px; border-radius:2px; background:var(--accent)}
 #tab-detail .sec-title.color-inline{justify-content:space-between}
 #tab-detail .sec-title.color-inline input[type=color]{width:44px; height:24px; margin-left:auto}
+#tab-detail .sec-title .auto-fit{
+  margin-left:auto; display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:400; letter-spacing:0; color:var(--text-2); cursor:pointer;
+  white-space:nowrap; background:var(--panel); border:1px solid var(--border-soft);
+  border-radius:8px; padding:3px 9px; transition:all .15s;
+}
+#tab-detail .sec-title .auto-fit:hover{border-color:var(--border); color:var(--text)}
+#tab-detail .sec-title .auto-fit input{width:14px; height:14px; accent-color:var(--accent); cursor:pointer; margin:0}
 #tab-detail .field{display:flex; flex-direction:column; gap:4px}
 #tab-detail .field>label{font-size:12px; color:var(--text-2)}
 #tab-detail input[type=text], #tab-detail input[type=number], #tab-detail textarea{
@@ -1336,7 +1344,13 @@ body.dark #tab-detail .dt-stage{
 
         <!-- 参数内容 -->
         <section class="sec">
-          <div class="sec-title">参数内容（可增删改）</div>
+          <div class="sec-title">
+            参数内容（可增删改）
+            <label class="auto-fit" title="开启后模板画布高度随参数行数自动增高（不被固定高度局限），行距保持宽松不变，页面布局按比例延伸">
+              <input type="checkbox" id="tableAutoFit" checked>
+              表格高度自适应
+            </label>
+          </div>
           <div class="param-rows" id="paramRows"></div>
           <button class="btn" id="addRowBtn" style="align-self:flex-start">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -3172,6 +3186,7 @@ const state = {
   image: DEFAULT_IMG,       // 当前白底图 dataURL
   imgMode: 'contain',       // contain | cover
   imgZoom: 1,               // 白底图缩放（预览区滚轮调整，0.5~2.5）
+  tableAutoFit: true,       // 表格高度自适应（按参数行数自动调整高度，页面布局不变）
   bg: '#ffffff',            // 背景层颜色（可自定义，默认白色）
   cardBg: '#f5f5f5',        // 表格区背景底色（固定浅灰，与上部背景区分开，不可自定义）
   titleEn: 'PARAMETER',     // 固定模板内容
@@ -3180,7 +3195,7 @@ const state = {
     { label:'品牌', value:'' },
     { label:'名称', value:'' },
     { label:'尺寸', value:'', unit:'mm' },
-    { label:'材质', value:'925银针 亲肤合金', quick:['亲肤合金','925银针','999银针','优质环保合金'] },
+    { label:'材质', value:'925银针 亲肤合金', quick:['亲肤合金','925银针','999银针','优质环保合金','甄选','臻选','优质','环保','精工','高品','奢润'] },
     { label:'保养', value:'软布清洁 远离化学品 避免刮碰\n避免遇水佩戴 避免睡觉佩戴', fixed:true }
   ],
   note: '*因人工测量可能存在些许误差，请以实物为准。',
@@ -3344,16 +3359,22 @@ function drawTo(c, W, H){
   const labelFont = '400 ' + fontPx + 'px ' + FONT;
   const valueFont = '400 ' + fontPx + 'px ' + FONT;
 
-  ctx.font = valueFont;
-  let li = 0;
-  const lineInfo = [];
-  state.rows.forEach(function(row){
-    const lines = wrapText(ctx, row.value, valueMaxW);
-    if(lines.length === 0) lines.push('');
-    lineInfo.push({ label: row.label, lines: lines, firstY: line0 + pitch * li });
-    li += lines.length;
-  });
-  const totalLines = li;
+  /* 按基准行距计算各参数行的文本行数与首行位置（画布高度已在外部按内容自适应增高，行距不再压缩） */
+  function dtBuildLines(font){
+    ctx.font = font;
+    let li = 0;
+    const arr = [];
+    state.rows.forEach(function(row){
+      const lines = wrapText(ctx, row.value, valueMaxW);
+      if(lines.length === 0) lines.push('');
+      arr.push({ label: row.label, lines: lines, firstY: line0 + pitch * li });
+      li += lines.length;
+    });
+    return { arr: arr, total: li };
+  }
+  const built = dtBuildLines(valueFont);
+  const lineInfo = built.arr;
+  const totalLines = built.total;
 
   /* 参数卡片（x36-712）：位置下移（顶 y650），四角小圆角，底色固定浅灰（不自定义、不加边框） */
   const cardTop = 650 * sy;
@@ -3366,7 +3387,7 @@ function drawTo(c, W, H){
     return Math.round(line0 + pitch * i + off * sy);
   };
   const lastDividerY = totalLines > 0 ? dividerY(totalLines - 1) : dividerY(0);
-  const noteCenterY = Math.max(1057.5 * sy, lastDividerY + 66.5 * sy);
+  const noteCenterY = Math.min(Math.max(1057.5 * sy, lastDividerY + 66.5 * sy), H - 30 * sy);
   const cardBottom = Math.max(1113 * sy, noteCenterY + 55.5 * sy);
   ctx.beginPath();
   ctx.moveTo(cardLeft + radius, cardTop);
@@ -3408,15 +3429,40 @@ function drawTo(c, W, H){
   ctx.fillText(state.note, W / 2, noteCenterY);
 }
 
+/* ================= 画布高度自适应 =================
+   开启「表格高度自适应」时：模板画布高度随参数行数自动增高（每新增一行，高度相应增加），
+   行距/字号保持基准不变，页面布局按高度等比例延伸，不被固定高度局限；
+   关闭时使用所选尺寸的固定高度 */
+const dtMeasureCtx = document.createElement('canvas').getContext('2d');
+function getAutoHeight(baseH){
+  if(!state.tableAutoFit) return baseH;
+  const sx = state.sizeW / 750;
+  const fontPx = Math.max(12, 20 * sx);
+  const pitch = 53.3 * (fontPx / 20);
+  const maxW = (648 - 105) * sx * 0.98;
+  dtMeasureCtx.font = '400 ' + fontPx + 'px ' + FONT;
+  let total = 0;
+  state.rows.forEach(function(row){
+    const lines = wrapText(dtMeasureCtx, row.value, maxW);
+    total += lines.length || 1;
+  });
+  if(total <= 1) return baseH;
+  /* 内容所需高度（画布px）：首行 719.5*sy + (总行数-1)*基准行距 + 备注/卡片占位 143.5*sy + 底部留白 36*sx，
+     其中 sy=H/1251；底部留白与左右留白宽度一致（卡片左右各 36px 参考系），保证视觉平衡，
+     解 H = ((总行数-1)*53.3 + 36) * sx * 1251 / (1251-863)，取不小于所选固定高度、不超 5000 */
+  const needed = ((total - 1) * 53.3 + 36) * sx * 1251 / (1251 - 719.5 - 143.5);
+  return Math.min(Math.max(baseH, Math.ceil(needed)), 5000);
+}
+
 /* ================= 预览渲染（预览始终与导出尺寸一致） ================= */
 function render(){
-  const W = state.sizeW, H = state.sizeH;
+  const W = state.sizeW, H = getAutoHeight(state.sizeH);
   previewCanvas.width = W; previewCanvas.height = H;
   drawTo(previewCanvas, W, H);
-  /* 更新导出标签与尺寸提示 */
+  /* 更新导出标签与尺寸提示（显示自适应后的实际高度） */
   const f = state.fmt === 'jpg' ? 'JPG' : state.fmt.toUpperCase();
-  document.getElementById('exportTag').textContent = '导出 ' + state.sizeW + ' × ' + state.sizeH + ' · ' + f;
-  document.getElementById('previewSize').textContent = state.sizeW + ' × ' + state.sizeH;
+  document.getElementById('exportTag').textContent = '导出 ' + W + ' × ' + H + ' · ' + f;
+  document.getElementById('previewSize').textContent = W + ' × ' + H;
 }
 
 const scheduleRender = debounce(render, 120);
@@ -3518,6 +3564,20 @@ function renderRows(){
 
     rowEl.appendChild(lbl); rowEl.appendChild(val);
 
+    /* 新增参数行右上角删除按钮（默认行不可删，避免误删模板结构） */
+    if(row.deletable){
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'del'; del.title = '删除该参数行';
+      del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+      del.addEventListener('click', function(){
+        const idx = state.rows.indexOf(row);
+        if(idx !== -1) state.rows.splice(idx, 1);
+        renderRows(); scheduleRender();
+        dtLog('已删除参数行：' + row.label, DT_C.warn);
+      });
+      rowEl.appendChild(del);
+    }
+
     /* 材质等行的固定快捷选项 chips（可多选组合，点选即写入内容） */
     if(row.quick){
       const chips = document.createElement('div');
@@ -3551,12 +3611,19 @@ function renderRows(){
   });
 }
 $('addRowBtn').addEventListener('click', function(){
-  const row = { label:'参数', value:'' };
+  const row = { label:'参数', value:'', deletable:true };
   /* 固定行（保养）保持在最底部：新参数插入到固定行前面 */
   const fixedIdx = state.rows.findIndex(r => r.fixed);
   if(fixedIdx === -1){ state.rows.push(row); } else { state.rows.splice(fixedIdx, 0, row); }
   renderRows(); scheduleRender();
   dtLog('已添加参数行：' + row.label + (fixedIdx === -1 ? '' : '（位于保养上方）'), DT_C.info);
+});
+
+/* 表格高度自适应开关 */
+$('tableAutoFit').addEventListener('change', function(){
+  state.tableAutoFit = this.checked;
+  render();
+  dtLog('表格高度自适应：' + (this.checked ? '开启（画布高度随参数行数自动增高）' : '关闭（固定所选尺寸高度）'), DT_C.info);
 });
 
 /* ================= 导出设置 ================= */
@@ -3599,17 +3666,17 @@ $('quality').addEventListener('input', function(){
 });
 
 /* ================= 导出 ================= */
-function downloadBlob(blob, ext){
+function downloadBlob(blob, ext, w, h){
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '产品参数图_' + state.sizeW + 'x' + state.sizeH + '.' + ext;
+  a.download = '产品参数图_' + w + 'x' + h + '.' + ext;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
 }
 $('exportBtn').addEventListener('click', function(){
-  const W = state.sizeW, H = state.sizeH;
+  const W = state.sizeW, H = getAutoHeight(state.sizeH);
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   drawTo(c, W, H);
@@ -3618,13 +3685,13 @@ $('exportBtn').addEventListener('click', function(){
   const q = state.fmt === 'png' ? undefined : state.quality;
   c.toBlob(function(blob){
     if(blob){
-      downloadBlob(blob, state.fmt === 'jpg' ? 'jpg' : state.fmt);
+      downloadBlob(blob, state.fmt === 'jpg' ? 'jpg' : state.fmt, W, H);
       toast('已导出 ' + W + '×' + H + ' 的 ' + (state.fmt === 'jpg' ? 'JPG' : state.fmt.toUpperCase()) + ' 图片');
       dtLog('已导出 ' + W + '×' + H + ' 的 ' + (state.fmt === 'jpg' ? 'JPG' : state.fmt.toUpperCase()) + ' 图片', DT_C.ok);
     } else {
       /* 浏览器不支持该格式时回退 PNG */
       c.toBlob(function(b2){
-        if(b2){ downloadBlob(b2, 'png'); toast('当前浏览器不支持 ' + state.fmt.toUpperCase() + '，已改用 PNG 导出'); dtLog('浏览器不支持 ' + state.fmt.toUpperCase() + '，已改用 PNG 导出', DT_C.warn); }
+        if(b2){ downloadBlob(b2, 'png', W, H); toast('当前浏览器不支持 ' + state.fmt.toUpperCase() + '，已改用 PNG 导出'); dtLog('浏览器不支持 ' + state.fmt.toUpperCase() + '，已改用 PNG 导出', DT_C.warn); }
         else { toast('导出失败，请更换浏览器或格式'); dtLog('导出失败：请更换浏览器或格式', DT_C.err); }
       }, 'image/png');
     }
