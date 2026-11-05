@@ -87,6 +87,31 @@ body.dark .top-status{border-color:#1f4a38}
 #themeToggle:hover{color:var(--text); border-color:var(--border)}
 #themeToggle svg{width:13px; height:13px}
 
+/* ===== 在线PS（内嵌 Photopea 官方在线编辑器，官方支持的嵌入方式） ===== */
+#tab-ps{padding:0; overflow:hidden; background:var(--card)}
+.ps-bar{
+  display:flex; align-items:center; gap:10px; padding:8px 16px; flex-shrink:0;
+  background:var(--card); border-bottom:1px solid var(--border-soft);
+  font-size:12.5px; color:var(--text-2); white-space:nowrap; overflow:hidden;
+}
+.ps-bar .ps-dot{width:8px; height:8px; border-radius:50%; background:var(--accent-2); flex-shrink:0}
+.ps-bar b{color:var(--text); font-weight:700}
+.ps-bar .ps-note{color:var(--text-3)}
+.ps-bar .spacer{flex:1}
+.ps-bar a{color:var(--accent); text-decoration:none; font-weight:600; white-space:nowrap; flex-shrink:0}
+.ps-bar a:hover{text-decoration:underline}
+#tab-ps .ps-frame-wrap{flex:1; min-height:0; position:relative; background:#1d1f22}
+#tab-ps iframe{position:absolute; inset:0; width:100%; height:100%; border:none; display:block}
+.ps-empty{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; color:#9aa3ad; font-size:13px; text-align:center; padding:20px;
+}
+.ps-empty .ps-spin{
+  width:22px; height:22px; border:2px solid #3a4048; border-top-color:#5fbdb0; border-radius:50%;
+  animation:psSpin 1s linear infinite;
+}
+@keyframes psSpin{to{transform:rotate(360deg)}}
+
 /* ===== 图片处理：三栏工作台 ===== */
 #tab-image{padding:14px 20px; overflow:hidden}
 .im-main{
@@ -791,6 +816,7 @@ body.dark #tab-detail .dt-stage{
   </div>
   <div class="nav-tabs">
     <button class="app-tab active" data-tab="image">图片处理</button>
+    <button class="app-tab" data-tab="ps">在线PS</button>
     <button class="app-tab" data-tab="rename">批量重命名</button>
     <button class="app-tab" data-tab="detail">详情模板</button>
   </div>
@@ -1376,6 +1402,23 @@ body.dark #tab-detail .dt-stage{
   <div id="detailToast"></div>
 </section>
 
+<!-- ===== 在线PS：内嵌 Photopea 官方在线编辑器（与「图片处理」同级的独立板块） ===== -->
+<section id="tab-ps">
+  <div class="ps-bar">
+    <span class="ps-dot"></span>
+    <span>在线PS · <b>Photopea 完整版编辑器</b>（图层 / 蒙版 / 滤镜 / 画笔 / 文字 / PSD 及全部格式导出）</span>
+    <span class="ps-note">图片在此编辑器内在线处理</span>
+    <span class="spacer"></span>
+    <a href="https://www.photopea.com/" target="_blank" rel="noopener">新窗口打开 ↗</a>
+  </div>
+  <div class="ps-frame-wrap">
+    <div class="ps-empty" id="psEmpty">
+      <span class="ps-spin"></span>
+      <span>正在载入 Photopea 在线编辑器…（首次载入约需几秒）</span>
+    </div>
+    <iframe id="psFrame" title="在线PS（Photopea）" allow="clipboard-read; clipboard-write" onload="document.getElementById('psEmpty').style.display='none'"></iframe>
+  </div>
+</section>
 
 <div class="toast" id="toast"></div>
 
@@ -1389,6 +1432,12 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
     document.getElementById('tab-rename').classList.toggle('active', tab.dataset.tab==='rename');
     document.getElementById('tab-image').classList.toggle('active', tab.dataset.tab==='image');
     document.getElementById('tab-detail').classList.toggle('active', tab.dataset.tab==='detail');
+    document.getElementById('tab-ps').classList.toggle('active', tab.dataset.tab==='ps');
+    /* 在线PS 懒加载：首次进入该板块时才加载 Photopea 官方编辑器，避免拖慢其它页面 */
+    if(tab.dataset.tab === 'ps'){
+      const f = document.getElementById('psFrame');
+      if(f && !f.getAttribute('src')) f.setAttribute('src', 'https://www.photopea.com/');
+    }
   });
 });
 // 深色模式切换
@@ -3260,9 +3309,9 @@ function drawTo(c, W, H){
   ctx.fillStyle = state.bg;
   ctx.fillRect(0, 140 * sy, W, (625 - 140) * sy);
 
-  /* 白底图（产品图）：画在背景层上，显示区域放大（x140-610, y310-592），
+  /* 白底图（产品图）：画在背景层上，显示区域进一步放大（x115-635, y285-625，宽 520×高 340），
      图片按 contain 等比适配，避免拉伸变形 */
-  const box = { x: 140 * sx, y: 310 * sy, w: 470 * sx, h: 282 * sy };
+  const box = { x: 115 * sx, y: 285 * sy, w: 520 * sx, h: 340 * sy };
   if(imgObj && imgObj.complete && imgObj.naturalWidth > 0){
     drawImageFit(ctx, imgObj, box, state.imgMode, state.imgZoom);
   } else {
@@ -3278,10 +3327,10 @@ function drawTo(c, W, H){
     ctx.fillText('上传你的白底图', W / 2, box.y + box.h / 2);
   }
 
-  /* 标题（与参考图一致：近黑 #181818、居中；EN 40px 中心 y217，CN 30px 中心 y259，整体上移） */
+  /* 标题（近黑 #181818、居中；EN 40px 中心 y180，CN 30px 中心 y222，整体上移 37px 更贴近顶部） */
   ctx.fillStyle = '#181818';
-  drawSpaced(ctx, state.titleEn, 217 * sy, 40 * sx, 7.5 * sx, W * 0.8, 700);
-  drawSpaced(ctx, state.titleCn, 259 * sy, 30 * sx, 1.5 * sx, W * 0.8, 600);
+  drawSpaced(ctx, state.titleEn, 180 * sy, 40 * sx, 7.5 * sx, W * 0.8, 700);
+  drawSpaced(ctx, state.titleCn, 222 * sy, 30 * sx, 1.5 * sx, W * 0.8, 600);
 
   /* 表格文本行网格：首行中心 y694.5，行距 50px；标签与数值均与参考图一致（常规字重 400、#4d4d4d） */
   const labelX = 105 * sx;
