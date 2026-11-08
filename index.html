@@ -670,8 +670,14 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
   border:1px solid var(--border); border-radius:12px;
   padding:10px; display:flex; flex-direction:column; gap:8px;
 }
-#tab-detail .dt-preview-meta{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-2)}
+#tab-detail .dt-preview-meta{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; color:var(--text-2); flex-wrap:nowrap}
+#tab-detail .dt-preview-meta>span{white-space:nowrap}
 #tab-detail .dt-preview-meta .tag{color:var(--accent); font-weight:600}
+/* 版式规格（与「主图参数」预览区右上那行同样的位置与样式） */
+#tab-detail .dt-preview-meta .spec{
+  flex:0 1 auto; margin-left:auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  text-align:right; font-weight:600; color:var(--accent);
+}
 #tab-detail .dt-stage{
   flex:1; min-height:0;
   background:repeating-conic-gradient(#e8eaed 0% 25%, #f5f6f7 0% 50%) 0 0 / 22px 22px;
@@ -1448,6 +1454,7 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
         <div class="dt-preview-meta">
           <span>模板 <b id="previewSize">1440 × 1920</b>（模板原比例）</span>
           <span class="tag" id="dtZoomBadge">白底图 100%</span>
+          <span class="tag spec" id="dtLayoutTag">基准 750×1251 · 左右 36 · 卡片顶 650 · 首行 719.5 · 行距 53.3 · 底部 36</span>
           <span class="tag" id="exportTag">导出 1440 × 1920 · JPG</span>
         </div>
         <div class="dt-stage">
