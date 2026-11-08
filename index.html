@@ -800,6 +800,78 @@ body.dark #tab-detail .dt-stage{
   box-shadow:0 8px 24px rgba(0,0,0,.2); max-width:88vw; text-align:center;
 }
 #tab-detail #detailToast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+/* ===== 主图参数（产品主图参数页，按标注：基准 800×800，边距 20，图片 760×500，参数 760×260） ===== */
+#tab-mainparam{padding:14px 20px; overflow:hidden; gap:10px}
+#tab-mainparam .mp-head{flex-shrink:0}
+#tab-mainparam .mp-head h1{font-size:18px; font-weight:800; display:flex; align-items:center; gap:10px; letter-spacing:-.2px}
+#tab-mainparam .mp-head h1 .dot{width:10px; height:10px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft)}
+#tab-mainparam .mp-sub{font-size:12.5px; color:var(--text-2); margin:5px 0 0 24px}
+#tab-mainparam .mp-body{flex:1; min-height:0; display:flex; gap:14px; align-items:stretch}
+#tab-mainparam .mp-preview-wrap{
+  flex:1 1 auto; min-width:0;
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:10px; display:flex; flex-direction:column; gap:8px;
+}
+#tab-mainparam .mp-meta{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-2)}
+#tab-mainparam .mp-meta .tag{color:var(--accent); font-weight:600}
+#tab-mainparam .mp-stage{
+  flex:1; min-height:0; min-width:0;
+  background:repeating-conic-gradient(#e8eaed 0% 25%, #f5f6f7 0% 50%) 0 0 / 22px 22px;
+  border:1px solid var(--border); border-radius:8px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden; padding:10px;
+}
+body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0% 25%, #1d252f 0% 50%) 0 0 / 22px 22px}
+#tab-mainparam #mpCanvas{display:block; height:100%; width:auto; max-width:100%; max-height:100%; flex:0 0 auto; background:#fff; box-shadow:0 6px 22px rgba(0,0,0,.12); border-radius:2px}
+#tab-mainparam .mp-panel{
+  width:340px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:12px; display:flex; flex-direction:column; gap:8px; overflow-y:auto;
+}
+#tab-mainparam .sec{display:flex; flex-direction:column; gap:6px; flex:0 0 auto}
+#tab-mainparam .sec-title{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; letter-spacing:.5px}
+#tab-mainparam .sec-title::before{content:""; width:4px; height:13px; border-radius:2px; background:var(--accent)}
+#tab-mainparam .btn{
+  border:1px solid var(--border); border-radius:8px; background:var(--panel); color:var(--text);
+  padding:7px 12px; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all .15s;
+}
+#tab-mainparam .btn:hover{border-color:var(--accent-2)}
+#tab-mainparam .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; padding:8px 14px; font-size:13px; width:100%; justify-content:center}
+#tab-mainparam .btn-primary:hover{background:var(--accent-2); border-color:var(--accent-2)}
+#tab-mainparam .field{display:flex; flex-direction:column; gap:4px}
+#tab-mainparam .field>label{font-size:12px; color:var(--text-2)}
+#tab-mainparam textarea, #tab-mainparam input[type=number], #tab-mainparam select{
+  width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+  font-size:14px; line-height:1.45; background:var(--card); color:var(--text); outline:none;
+  font-family:inherit; resize:vertical;
+}
+#tab-mainparam textarea:focus, #tab-mainparam select:focus, #tab-mainparam input:focus{border-color:var(--accent)}
+#tab-mainparam .mp-size-row{display:flex; gap:8px; align-items:flex-end}
+#tab-mainparam .mp-size-row .field{flex:1}
+#tab-mainparam .mp-note{font-size:12px; color:var(--text-2); line-height:1.5}
+#tab-mainparam .mp-preset-row{display:flex; gap:6px}
+#tab-mainparam .mp-preset-row .btn{flex:1; justify-content:center; padding:6px 2px; font-size:11.5px; white-space:nowrap}
+#tab-mainparam .mp-scale-row{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2)}
+#tab-mainparam .mp-scale-row input[type=range]{flex:1; padding:0; border:none; background:none}
+#tab-mainparam .mp-scale-val{font-size:12px; color:var(--text); min-width:38px; text-align:right}
+#tab-mainparam .mp-logbar{
+  flex:1 1 0; min-height:120px; border:1px solid var(--border); border-radius:10px;
+  background:var(--card); overflow:hidden; display:flex; flex-direction:column;
+}
+#tab-mainparam .mp-logbar-head{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:6px 12px; background:var(--panel); border-bottom:1px solid var(--border-soft); flex-shrink:0;
+  font-size:12.5px; font-weight:600; color:var(--text);
+}
+#tab-mainparam .mp-log{
+  flex:1; min-height:60px; overflow-y:auto; padding:8px 12px; background:var(--log-bg); color:var(--log-text);
+  font-family:Consolas,"SF Mono",monospace; font-size:12px; line-height:1.55;
+}
+@media (max-width:900px){
+  #tab-mainparam{overflow-y:auto}
+  #tab-mainparam .mp-body{flex:none; flex-direction:column; gap:12px}
+  #tab-mainparam .mp-panel{width:100%}
+  #tab-mainparam .mp-preview-wrap .mp-stage{min-height:52vh}
+}
+
 /* 详情模板响应式 */
 @media (max-width:900px){
   #tab-detail{overflow-y:auto; padding:12px}
@@ -827,6 +899,7 @@ body.dark #tab-detail .dt-stage{
     <button class="app-tab" data-tab="ps">在线PS</button>
     <button class="app-tab" data-tab="rename">批量重命名</button>
     <button class="app-tab" data-tab="detail">详情模板</button>
+    <button class="app-tab" data-tab="mainparam">主图参数</button>
   </div>
   <div class="top-status">本地处理 · 不上传服务器</div>
   <button id="themeToggle" title="切换深色/浅色模式">
@@ -1416,6 +1489,93 @@ body.dark #tab-detail .dt-stage{
   <div id="detailToast"></div>
 </section>
 
+<!-- ===== 主图参数（产品主图参数页：主图 + 4 项参数，布局按参考图标注） ===== -->
+<section id="tab-mainparam">
+  <div class="mp-head">
+    <h1><span class="dot"></span>主图参数</h1>
+    <p class="mp-sub">上传主图 + 编辑 4 项参数（文字统一自适应、限定各自区域不溢出）；画布宽高可自定义，基准 800 × 800</p>
+  </div>
+  <div class="mp-body">
+    <div class="mp-preview-wrap">
+      <div class="mp-meta">
+        <span>画布 <b id="mpCanvasSize">800 × 800</b></span>
+        <span class="tag" id="mpAutoTag">基准 800 × 800 · 页边距 20 · 图片 760 × 500 · 参数 760 × 260 · 底部 20</span>
+      </div>
+      <div class="mp-stage">
+        <canvas id="mpCanvas" width="800" height="800"></canvas>
+      </div>
+    </div>
+    <aside class="mp-panel">
+      <section class="sec">
+        <div class="sec-title">主图</div>
+        <div style="display:flex; gap:8px">
+          <button class="btn" id="mpUploadBtn" style="flex:1; justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            上传主图
+          </button>
+          <button class="btn" id="mpResetImgBtn" title="清除当前主图">清除</button>
+          <input type="file" id="mpFile" accept="image/*" hidden>
+        </div>
+        <div class="field">
+          <label for="mpImgMode">图片显示方式</label>
+          <select id="mpImgMode">
+            <option value="cover">铺满裁剪（主图推荐）</option>
+            <option value="contain">完整显示</option>
+          </select>
+        </div>
+        <div class="mp-scale-row">
+          <label for="mpImgScale">图片缩放</label>
+          <input type="range" id="mpImgScale" min="1" max="4" step="0.01" value="1">
+          <span class="mp-scale-val" id="mpImgScaleVal">100%</span>
+        </div>
+      </section>
+      <section class="sec">
+        <div class="sec-title">产品参数（4 项 · 自动适配）</div>
+        <div class="field"><label for="mpV1">产品材质</label><textarea id="mpV1" rows="2">925银耳针，优质亲肤合金</textarea></div>
+        <div class="field"><label for="mpV2">产品尺寸</label><textarea id="mpV2" rows="2">长宽约cm</textarea></div>
+        <div class="field"><label for="mpV3">发货时效</label><textarea id="mpV3" rows="3">预计下单后24小时内发出，系统会按照下单顺序优先处理，早拍的早发，全部会在48小时内发出哈！</textarea></div>
+        <div class="field"><label for="mpV4">售后服务</label><textarea id="mpV4" rows="3">支持7天无理由退换，15天内质量问题包退换，收到货有任何问题随时联系客服</textarea></div>
+      </section>
+      <section class="sec">
+        <div class="sec-title">画布尺寸（可自定义）</div>
+        <div class="mp-size-row">
+          <div class="field"><label for="mpW">宽 (px)</label><input type="number" id="mpW" value="800" min="300" max="5000"></div>
+          <div class="field"><label for="mpH">高 (px)</label><input type="number" id="mpH" value="800" min="300" max="5000"></div>
+        </div>
+        <div class="mp-preset-row">
+          <button class="btn" data-mpsize="1000">1000 × 1000</button>
+          <button class="btn" data-mpsize="1440">1440 × 1440</button>
+          <button class="btn" data-mpsize="2480">2480 × 2480</button>
+        </div>
+        <div class="mp-note">布局以 800 × 800 为基准按宽高分别缩放：四周边距 20，图片区 760 × 500，参数区 760 × 260，底部再留 20。</div>
+      </section>
+      <section class="sec">
+        <div class="sec-title">导出</div>
+        <div class="field">
+          <label for="mpFmt">图片格式</label>
+          <select id="mpFmt">
+            <option value="jpg">JPG（100%）</option>
+            <option value="png">PNG</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="mpExportBtn">导出图片</button>
+      </section>
+
+      <!-- ===== 日志台 ===== -->
+      <div class="mp-logbar">
+        <div class="mp-logbar-head">
+          <span>日志台</span>
+          <div class="log-actions">
+            <button class="im-btn ghost sm" id="mpCopyLog">复制日志</button>
+            <button class="im-btn ghost sm" id="mpClearLog">清空</button>
+          </div>
+        </div>
+        <div class="mp-log" id="mpLog"></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
 <!-- ===== 在线PS：内嵌 Photopea 官方在线编辑器（与「图片处理」同级的独立板块） ===== -->
 <section id="tab-ps">
   <div class="ps-bar">
@@ -1446,6 +1606,7 @@ document.querySelectorAll('.app-tab').forEach(tab=>{
     document.getElementById('tab-rename').classList.toggle('active', tab.dataset.tab==='rename');
     document.getElementById('tab-image').classList.toggle('active', tab.dataset.tab==='image');
     document.getElementById('tab-detail').classList.toggle('active', tab.dataset.tab==='detail');
+    document.getElementById('tab-mainparam').classList.toggle('active', tab.dataset.tab==='mainparam');
     document.getElementById('tab-ps').classList.toggle('active', tab.dataset.tab==='ps');
     /* 在线PS 懒加载：首次进入该板块时才加载 Photopea 官方编辑器，避免拖慢其它页面 */
     if(tab.dataset.tab === 'ps'){
@@ -3704,6 +3865,396 @@ $('qtyRow').style.display = 'flex';
 setImage(DEFAULT_IMG, false);
 })();
 
+</script>
+
+<script>
+// ===== 主图参数（主图 + 4 项参数，基准 800 × 800） =====
+(function(){
+"use strict";
+const FONT = "-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif";
+const BASE   = 800;   // 基准画布 800 × 800
+const PAD    = 20;    // 四周页边距 20
+const IMG_H  = 500;   // 图片区 760 × 500（y: 20 ~ 520）
+const CELL_PAD = { top:45, left:35, right:20, bottom:8 };   // 参数格内边距：左 35 · 上 45 · 右 20 · 下 8（下边距压缩给字号让位，文字起始仍在上 45）
+
+const mpState = {
+  img: null,
+  imgMode: 'cover',   // cover 铺满裁剪 / contain 完整显示
+  imgScale: 1,        // 图片缩放（1 ~ 4 倍，滚轮/滑块调整）
+  offX: 0, offY: 0,   // 图片位置偏移（基准 800 坐标系，鼠标拖动调整）
+  bg: '#ffffff',
+  W: 800, H: 800,
+  fmt: 'jpg',
+  cells: [            // 4 格参数：标签固定，内容可编辑（默认填充常用文案），限定各自区域
+    { label:'产品材质：', value:'925银耳针，优质亲肤合金' },
+    { label:'产品尺寸：', value:'长宽约cm' },
+    { label:'发货时效：', value:'预计下单后24小时内发出，系统会按照下单顺序优先处理，早拍的早发，全部会在48小时内发出哈！' },
+    { label:'售后服务：', value:'支持7天无理由退换，15天内质量问题包退换，收到货有任何问题随时联系客服' }
+  ]
+};
+
+const $ = function(id){ return document.getElementById(id); };
+const mpCanvas = $('mpCanvas');
+
+/* ---------- 日志台 ---------- */
+const MPC = { ok:'#5fbdb0', err:'#f0716c', warn:'#d9b45b', info:'#7cb8e0' };
+function mpLog(msg, color){
+  const el = $('mpLog'); if(!el) return;
+  const line = document.createElement('div');
+  line.style.color = color || '#c9d1d9';
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  el.appendChild(line); el.scrollTop = el.scrollHeight;
+}
+$('mpCopyLog').addEventListener('click', function(){
+  const t = $('mpLog').innerText;
+  navigator.clipboard.writeText(t)
+    .then(function(){ mpLog('日志已复制', MPC.ok); })
+    .catch(function(){ mpLog('复制失败', MPC.err); });
+});
+$('mpClearLog').addEventListener('click', function(){
+  $('mpLog').innerHTML = '';
+  mpLog('日志已清空', MPC.info);
+});
+
+function mpDebounce(fn, ms){
+  let timer;
+  return function(){ const args = arguments; clearTimeout(timer); timer = setTimeout(function(){ fn.apply(null, args); }, ms); };
+}
+
+/* ---------- 逐字断行：标签与内容在同一流内，超出格宽自动换行 ---------- */
+function mpWrap(ctx, label, value, maxW, labelFont, valueFont){
+  const lines = [];
+  let cur = [], w = 0;
+  const NO_START = '，。、；：！？）》」』】…％%·～';   /* 避头标点：不放到行首 */
+  function push(ch, isLabel){
+    ctx.font = isLabel ? labelFont : valueFont;
+    const cw = ctx.measureText(ch).width;
+    if(w + cw > maxW && cur.length && NO_START.indexOf(ch) < 0){ lines.push(cur); cur = []; w = 0; }
+    cur.push({ ch: ch, isLabel: isLabel, w: cw });
+    w += cw;
+  }
+  for(const ch of String(label || '')) push(ch, true);
+  for(const ch of String(value || '')){
+    if(ch === '\n'){
+      if(cur.length){ lines.push(cur); cur = []; w = 0; }
+      continue;
+    }
+    push(ch, false);
+  }
+  if(cur.length) lines.push(cur);
+  return lines;
+}
+
+/* ---------- 统一字号自适应：四格共用同一字号，取全部内容都放得下的最大值 ---------- */
+function mpFitFont(ctx, tw, th){
+  /* 字号与详情模板同源（20px @750 基准），四格统一取「全部内容都放得下」的最大字号 */
+  const maxF = Math.max(13, 20 * (mpState.W / 750));
+  for(let f = Math.round(maxF); f >= 10; f--){
+    const labelFont = '700 ' + f + 'px ' + FONT;
+    const valueFont = '400 ' + f + 'px ' + FONT;
+    const lh = f * 1.75;
+    let fit = true;
+    for(const c of mpState.cells){
+      const lines = mpWrap(ctx, c.label, c.value, tw, labelFont, valueFont);
+      if(lines.length * lh > th){ fit = false; break; }
+    }
+    if(fit) return f;
+  }
+  return 11;
+}
+
+/* ---------- 圆角路径（与详情模板参数卡片同源：max(2, 10×缩放)） ---------- */
+function mpRoundPath(ctx, x, y, w, h, r){
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+/* ---------- 图片区：cover 铺满 / contain 完整显示；四角圆角；支持拖动偏移 ---------- */
+function mpDrawImage(ctx, box, radius){
+  const img = mpState.img;
+  if(!img){
+    const u = mpState.W / BASE;
+    ctx.save();
+    ctx.strokeStyle = '#c9cdd3';
+    ctx.lineWidth = Math.max(1.5, 2 * u);
+    ctx.setLineDash([6 * u, 5 * u]);
+    mpRoundPath(ctx, box.x, box.y, box.w, box.h, radius);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#b5b9bf';
+    ctx.font = '400 ' + Math.max(13, 18 * u) + 'px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('点击此处上传主图（上传后可拖动 · 滚轮缩放 · 双击还原）', box.x + box.w / 2, box.y + box.h / 2);
+    return;
+  }
+  const base = mpState.imgMode === 'cover'
+    ? Math.max(box.w / img.width, box.h / img.height)
+    : Math.min(box.w / img.width, box.h / img.height);
+  const s = base * (mpState.imgScale || 1);
+  const dw = img.width * s, dh = img.height * s;
+
+  /* 拖动偏移（基准坐标系 → 画布坐标系），限制在图片自身范围内，不会露出白边 */
+  const sx = mpState.W / BASE, sy = mpState.H / BASE;
+  const maxOX = Math.max(0, (dw - box.w) / 2);
+  const maxOY = Math.max(0, (dh - box.h) / 2);
+  const ox = Math.min(maxOX, Math.max(-maxOX, (mpState.offX || 0) * sx));
+  const oy = Math.min(maxOY, Math.max(-maxOY, (mpState.offY || 0) * sy));
+
+  ctx.save();
+  mpRoundPath(ctx, box.x, box.y, box.w, box.h, radius);   /* 照片四角圆角 */
+  ctx.clip();
+  ctx.drawImage(img, box.x + (box.w - dw) / 2 + ox, box.y + (box.h - dh) / 2 + oy, dw, dh);
+  ctx.restore();
+}
+
+/* ---------- 整页绘制 ---------- */
+function drawMp(ctx, W, H){
+  const sx = W / BASE, sy = H / BASE;
+  ctx.fillStyle = mpState.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const radius = Math.max(2, 10 * sx);          /* 圆角与详情模板同源 */
+  const left   = PAD * sx;
+  const top    = PAD * sy;
+  const width  = (BASE - PAD * 2) * sx;
+  const tbTop  = (PAD + IMG_H) * sy;            /* 参数区顶 520 */
+  const bottom = (BASE - PAD) * sy;             /* 卡片底 780（画布底部再留 20 边距） */
+
+  /* 参数区底块：顶部略上探到图片区底部圆角之下，使照片圆角外侧显示灰色（不留白缝），
+     底部两角为卡片圆角 */
+  const fillTop = tbTop - radius * 2;
+  ctx.beginPath();
+  ctx.moveTo(left, fillTop);
+  ctx.lineTo(left + width, fillTop);
+  ctx.lineTo(left + width, bottom - radius);
+  ctx.arcTo(left + width, bottom, left + width - radius, bottom, radius);
+  ctx.lineTo(left + radius, bottom);
+  ctx.arcTo(left, bottom, left, bottom - radius, radius);
+  ctx.lineTo(left, fillTop);
+  ctx.closePath();
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fill();
+
+  /* 图片区：760 × 500，四角圆角，压在参数区之上 */
+  const imgBox = { x: left, y: top, w: width, h: IMG_H * sy };
+  mpDrawImage(ctx, imgBox, radius);
+
+  /* 2 × 2 四格：左 35 · 上 45 · 右/下 20 */
+  const cw = width / 2, ch = (bottom - tbTop) / 2;
+  const tw = cw - (CELL_PAD.left + CELL_PAD.right) * sx;
+  const th = ch - (CELL_PAD.top + CELL_PAD.bottom) * sy;
+  const f = mpFitFont(ctx, tw, th);
+  const labelFont = '700 ' + f + 'px ' + FONT;   /* 标签加粗 */
+  const valueFont = '400 ' + f + 'px ' + FONT;   /* 正文常规（与详情模板同源） */
+  const lh = f * 1.75;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = valueFont;
+  ctx.fillStyle = '#4d4d4d';
+  mpState.cells.forEach(function(cell, i){
+    const cx = left + (i % 2) * cw;
+    const cy = tbTop + Math.floor(i / 2) * ch;
+    const tx = cx + CELL_PAD.left * sx;
+    const ty = cy + CELL_PAD.top * sy + lh / 2;
+    const lines = mpWrap(ctx, cell.label, cell.value, tw, labelFont, valueFont);
+    lines.forEach(function(line, li){
+      let x = tx;
+      const y = ty + li * lh;
+      ctx.fillStyle = '#4d4d4d';
+      line.forEach(function(tk){
+        ctx.font = tk.isLabel ? labelFont : valueFont;   /* 标签加粗，正文常规 */
+        ctx.fillText(tk.ch, x, y);
+        x += tk.w;
+      });
+    });
+  });
+}
+
+/* ---------- 预览渲染 ---------- */
+function mpRender(){
+  const W = mpState.W, H = mpState.H;
+  mpCanvas.width = W;
+  mpCanvas.height = H;
+  drawMp(mpCanvas.getContext('2d'), W, H);
+  $('mpCanvasSize').textContent = W + ' × ' + H;
+  if(typeof mpSyncCursor === 'function') mpSyncCursor();
+}
+const mpRenderer = mpDebounce(mpRender, 100);
+
+/* ---------- 4 格参数编辑 ---------- */
+[0, 1, 2, 3].forEach(function(i){
+  const el = $('mpV' + (i + 1));
+  if(!el) return;
+  el.addEventListener('input', function(){
+    mpState.cells[i].value = el.value;
+    mpRenderer();
+  });
+});
+
+/* ---------- 主图上传 / 清除 / 显示方式 ---------- */
+$('mpUploadBtn').addEventListener('click', function(){ $('mpFile').click(); });
+$('mpFile').addEventListener('change', function(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    const im = new Image();
+    im.onload = function(){
+      mpState.img = im;
+      mpState.imgScale = 1;
+      mpState.offX = 0;
+      mpState.offY = 0;
+      mpSyncScaleUI();
+      mpRender();
+      mpLog('已上传主图：' + file.name + '（原图 ' + im.width + '×' + im.height + '）', MPC.ok);
+    };
+    im.onerror = function(){ mpLog('图片加载失败，请更换图片', MPC.err); };
+    im.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+$('mpResetImgBtn').addEventListener('click', function(){
+  mpState.img = null;
+  mpState.imgScale = 1;
+  mpState.offX = 0;
+  mpState.offY = 0;
+  mpSyncScaleUI();
+  mpRender();
+  mpLog('已清除主图', MPC.info);
+});
+$('mpImgScale').addEventListener('input', function(){
+  mpState.imgScale = parseFloat(this.value) || 1;
+  $('mpImgScaleVal').textContent = Math.round(mpState.imgScale * 100) + '%';
+  mpRenderer();
+});
+/* ---------- 画布交互：鼠标拖动位置 · 滚轮缩放 · 双击还原原始大小 ---------- */
+const MP_ZOOM_MIN = 1, MP_ZOOM_MAX = 4;
+function mpSyncScaleUI(){
+  const v = Math.min(MP_ZOOM_MAX, Math.max(MP_ZOOM_MIN, mpState.imgScale || 1));
+  if($('mpImgScale')) $('mpImgScale').value = String(v);
+  if($('mpImgScaleVal')) $('mpImgScaleVal').textContent = Math.round(v * 100) + '%';
+}
+function mpPoint(e){
+  const r = mpCanvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (mpState.W / r.width), y: (e.clientY - r.top) * (mpState.H / r.height) };
+}
+function mpInImageArea(pt){
+  const sx = mpState.W / BASE, sy = mpState.H / BASE;
+  return pt.x >= PAD * sx && pt.x <= (BASE - PAD) * sx && pt.y >= PAD * sy && pt.y <= (PAD + IMG_H) * sy;
+}
+let mpDrag = null;
+/* 空态时点击图片区直接选图上传 */
+mpCanvas.addEventListener('click', function(){
+  if(!mpState.img){ $('mpFile').click(); }
+});
+function mpSyncCursor(){ mpCanvas.style.cursor = mpState.img ? 'grab' : 'pointer'; }
+
+mpCanvas.addEventListener('mousedown', function(e){
+  if(!mpState.img) return;
+  const pt = mpPoint(e);
+  if(!mpInImageArea(pt)) return;
+  e.preventDefault();
+  mpDrag = { x: pt.x, y: pt.y, ox: mpState.offX || 0, oy: mpState.offY || 0 };
+  mpCanvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', function(e){
+  if(!mpDrag) return;
+  const pt = mpPoint(e);
+  const sx = mpState.W / BASE, sy = mpState.H / BASE;
+  mpState.offX = mpDrag.ox + (pt.x - mpDrag.x) / sx;
+  mpState.offY = mpDrag.oy + (pt.y - mpDrag.y) / sy;
+  mpRender();
+});
+window.addEventListener('mouseup', function(){
+  if(!mpDrag) return;
+  mpDrag = null;
+  mpCanvas.style.cursor = mpState.img ? 'grab' : 'default';
+});
+mpCanvas.addEventListener('mousemove', function(e){
+  if(mpDrag || !mpState.img) return;
+  mpCanvas.style.cursor = mpInImageArea(mpPoint(e)) ? 'grab' : 'default';
+});
+mpCanvas.addEventListener('wheel', function(e){
+  if(!mpState.img) return;
+  e.preventDefault();
+  const k = e.deltaY > 0 ? 0.92 : 1.08;
+  mpState.imgScale = Math.min(MP_ZOOM_MAX, Math.max(MP_ZOOM_MIN, (mpState.imgScale || 1) * k));
+  mpSyncScaleUI();
+  mpRender();
+}, { passive: false });
+mpCanvas.addEventListener('dblclick', function(e){
+  if(!mpState.img) return;
+  const pt = mpPoint(e);
+  if(!mpInImageArea(pt)) return;
+  mpState.imgScale = 1;
+  mpState.offX = 0;
+  mpState.offY = 0;
+  mpSyncScaleUI();
+  mpRender();
+  mpLog('已还原图片原始大小与位置', MPC.info);
+});
+
+$('mpImgMode').addEventListener('change', function(){
+  mpState.imgMode = this.value;
+  mpRender();
+  mpLog('图片显示方式：' + (this.value === 'cover' ? '铺满裁剪' : '完整显示'), MPC.info);
+});
+
+/* ---------- 画布尺寸自定义 ---------- */
+function mpApplySize(){
+  const w = Math.max(300, Math.min(5000, parseInt($('mpW').value, 10) || 800));
+  const h = Math.max(300, Math.min(5000, parseInt($('mpH').value, 10) || 800));
+  mpState.W = w;
+  mpState.H = h;
+  mpRender();
+  mpLog('画布尺寸：' + w + ' × ' + h + '（边距/图片区/参数区按基准等比缩放）', MPC.info);
+}
+$('mpW').addEventListener('input', mpApplySize);
+$('mpH').addEventListener('input', mpApplySize);
+document.querySelectorAll('#tab-mainparam .mp-preset-row .btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    const v = parseInt(b.getAttribute('data-mpsize'), 10) || 800;
+    $('mpW').value = v;
+    $('mpH').value = v;
+    mpApplySize();
+  });
+});
+
+/* ---------- 导出 ---------- */
+$('mpFmt').addEventListener('change', function(){ mpState.fmt = this.value; });
+$('mpExportBtn').addEventListener('click', function(){
+  const W = mpState.W, H = mpState.H;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  drawMp(c.getContext('2d'), W, H);
+  const type = mpState.fmt === 'png' ? 'image/png' : 'image/jpeg';
+  c.toBlob(function(blob){
+    if(!blob){ mpLog('导出失败，请更换浏览器重试', MPC.err); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '主图参数_' + W + 'x' + H + '.' + mpState.fmt;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+    mpLog('已导出 主图参数_' + W + 'x' + H + '.' + mpState.fmt, MPC.ok);
+  }, type, 1);
+});
+
+/* ---------- 初始化 ---------- */
+mpLog('主图参数页已就绪：基准 800 × 800，四周 20，图片 760 × 500，参数 760 × 260（4 格，底部留 20）', MPC.info);
+mpRender();
+})();
 </script>
 </body>
 </html>
