@@ -656,7 +656,7 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
    ============================================================ */
 #tab-detail{overflow:hidden}
 #tab-detail .dt-main{
-  flex:1; min-height:0; width:100%; max-width:1580px; margin:0 auto;
+  flex:1; min-height:0; width:100%; max-width:none; margin:0;
   display:flex; flex-direction:column; gap:10px; padding:14px 20px;
 }
 #tab-detail .dt-head{flex-shrink:0}
@@ -713,8 +713,12 @@ body.dark #tab-detail .dt-stage{
 #tab-detail input:focus, #tab-detail textarea:focus{border-color:var(--accent)}
 #tab-detail input[type=color]{width:46px; height:32px; padding:2px; border:1px solid var(--border); border-radius:8px; background:var(--card); cursor:pointer}
 #tab-detail input[type=range]{width:100%; accent-color:var(--accent)}
-/* 白底图区 */
-#tab-detail .img-tools{display:flex; gap:8px; flex-wrap:wrap}
+/* 白底图区（与「主图参数」的主图区同款：主按钮 + 小按钮 + 下拉） */
+#tab-detail .img-tools{display:flex; gap:8px; flex-wrap:nowrap}
+#tab-detail .img-tools .btn{flex:0 0 auto; padding:6px 12px; font-size:12.5px}
+#tab-detail .img-tools .btn-upload{flex:1 1 auto; justify-content:center}
+#tab-detail .img-mode-field{display:flex; flex-direction:column; gap:4px}
+#tab-detail .img-mode-field>label{font-size:12px; color:var(--text-2)}
 #tab-detail .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
   padding:5px 10px; border-radius:8px; border:1px solid var(--border);
@@ -736,21 +740,41 @@ body.dark #tab-detail .dt-stage{
   font-size:12px; color:var(--text-2); cursor:pointer; background:var(--card); transition:all .15s;
 }
 #tab-detail .radio-pill input:checked+span{color:#fff; background:var(--accent); border-color:var(--accent); font-weight:600}
-/* 参数行 */
-#tab-detail .param-rows{display:flex; flex-direction:column; gap:8px}
-#tab-detail .param-row{display:flex; gap:8px; align-items:stretch; flex-wrap:wrap}
-#tab-detail .param-row .lbl{width:88px; flex-shrink:0}
-#tab-detail .param-row .val{flex:1; min-width:0}
-#tab-detail .param-row .lbl, #tab-detail .param-row .val{padding:8px 10px; font-size:15px; line-height:1.45}
+/* 参数行：与「主图参数」一致——名称在上可直接改，内容框在下方通栏 */
+#tab-detail .param-rows{display:flex; flex-direction:column; gap:10px}
+#tab-detail .param-row{display:flex; flex-direction:column; gap:3px; position:relative}
+#tab-detail .param-row .lbl{
+  width:auto; max-width:calc(100% - 30px); align-self:flex-start;
+  font-size:12px; font-weight:700; color:var(--text-2); font-family:inherit;
+  border:1px solid transparent; background:transparent; border-radius:5px;
+  padding:1px 4px; line-height:1.5; outline:none; transition:border-color .15s, background .15s;
+}
+#tab-detail .param-row .lbl:hover{border-color:var(--border); background:#fff}
+#tab-detail .param-row .lbl:focus{border-color:var(--accent); background:#fff; color:var(--text)}
+#tab-detail .param-row .val{
+  width:100%; min-width:0; flex:0 0 auto;
+  padding:8px 10px; font-size:14px; line-height:1.45;
+}
 #tab-detail .param-row .del{
-  width:34px; flex-shrink:0; border:1px solid var(--border); border-radius:8px;
+  position:absolute; right:0; top:0; width:22px; height:22px;
+  border:1px solid var(--border); border-radius:50%;
   background:var(--card); color:var(--danger); cursor:pointer; font-size:16px;
   display:flex; align-items:center; justify-content:center; transition:all .15s;
 }
 #tab-detail .param-row .del:hover{background:var(--danger-bg); border-color:var(--danger)}
 #tab-detail .param-row .del svg{width:14px; height:14px}
 /* 材质快捷选项 chips */
-#tab-detail .quick-chips{flex:1 1 100%; display:flex; flex-wrap:wrap; gap:6px}
+#tab-detail .param-row{position:relative}
+/* 材质快捷词：悬停行内时下滑浮层，移出隐藏，不占表格高度 */
+#tab-detail .quick-chips{
+  position:absolute; left:0; right:0; top:calc(100% - 2px); z-index:60;
+  display:flex; flex-wrap:wrap; gap:6px; padding:8px;
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 28px rgba(0,0,0,.14);
+  opacity:0; visibility:hidden; transform:translateY(-6px); pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease, visibility .16s;
+}
+#tab-detail .param-row:hover .quick-chips{opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto}
 #tab-detail .quick-chips .chip{
   border:1px solid var(--border); border-radius:999px; background:var(--card);
   color:var(--text); font-size:12px; padding:2px 8px; cursor:pointer; transition:all .15s; font-family:inherit;
@@ -822,6 +846,23 @@ body.dark #tab-detail .dt-stage{
 }
 body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0% 25%, #1d252f 0% 50%) 0 0 / 22px 22px}
 #tab-mainparam #mpCanvas{display:block; height:100%; width:auto; max-width:100%; max-height:100%; flex:0 0 auto; background:#fff; box-shadow:0 6px 22px rgba(0,0,0,.12); border-radius:2px}
+/* 产品材质快捷词：鼠标悬停时下滑浮层显示，移出隐藏，不挤压原布局 */
+#tab-mainparam .mp-field-mat{position:relative}
+#tab-mainparam .mp-sugg{
+  position:absolute; left:0; right:0; top:calc(100% - 2px); z-index:60;
+  display:flex; flex-wrap:wrap; gap:6px; padding:8px;
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 28px rgba(0,0,0,.14);
+  opacity:0; visibility:hidden; transform:translateY(-6px); pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease, visibility .16s;
+}
+#tab-mainparam .mp-field-mat:hover .mp-sugg{opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto}
+#tab-mainparam .mp-sugg .chip{
+  border:1px solid var(--border); border-radius:999px; background:var(--card);
+  color:var(--text); font-size:12px; padding:2px 8px; cursor:pointer; transition:all .15s; font-family:inherit;
+}
+#tab-mainparam .mp-sugg .chip:hover{border-color:var(--accent); color:var(--accent)}
+#tab-mainparam .mp-sugg .chip.on{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
 #tab-mainparam .mp-panel{
   width:340px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:12px;
   padding:12px; display:flex; flex-direction:column; gap:8px; overflow-y:auto;
@@ -836,8 +877,34 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
 #tab-mainparam .btn:hover{border-color:var(--accent-2)}
 #tab-mainparam .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; padding:8px 14px; font-size:13px; width:100%; justify-content:center}
 #tab-mainparam .btn-primary:hover{background:var(--accent-2); border-color:var(--accent-2)}
+/* 输入框右上角「清空」小按钮（主图参数 / 详情模板通用） */
+/* 让包裹层成为 flex 容器：内容框随行高拉伸，与左侧标签框等高对齐 */
+.mp-ta-wrap{position:relative; display:flex; flex-direction:column}
+.mp-ta-wrap textarea{display:block; width:100%; flex:1 1 auto; min-width:0; box-sizing:border-box}
+.mp-ta-wrap .clr-x{
+  position:absolute; right:4px; top:4px; width:18px; height:18px; border-radius:50%;
+  border:1px solid var(--border); background:var(--card); color:var(--text-3);
+  display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer;
+  z-index:5; opacity:.8; transition:all .15s;
+}
+.mp-ta-wrap .clr-x:hover{opacity:1; color:#fff; background:var(--danger); border-color:var(--danger)}
+.mp-ta-wrap .clr-x svg{width:10px; height:10px}
+#tab-mainparam .mp-ta-wrap textarea{padding-right:32px}
+#tab-detail .mp-ta-wrap textarea{padding-right:32px}
+#tab-detail .param-row .mp-ta-wrap .val{padding-right:32px}
+#tab-detail .param-row .mp-ta-wrap{width:100%; min-width:0}
 #tab-mainparam .field{display:flex; flex-direction:column; gap:4px}
 #tab-mainparam .field>label{font-size:12px; color:var(--text-2)}
+/* 四格名称可直接编辑：默认像标签，悬停/聚焦看得出来可改 */
+#tab-mainparam .mp-lbl-edit{
+  width:auto; max-width:100%; align-self:flex-start;
+  font-size:12px; font-weight:700; color:var(--text-2); font-family:inherit;
+  border:1px solid transparent; background:transparent; border-radius:5px;
+  padding:1px 4px; line-height:1.5; outline:none; transition:border-color .15s, background .15s;
+  cursor:text;
+}
+#tab-mainparam .mp-lbl-edit:hover{border-color:var(--border); background:#fff}
+#tab-mainparam .mp-lbl-edit:focus{border-color:var(--accent); background:#fff; color:var(--text)}
 #tab-mainparam textarea, #tab-mainparam input[type=number], #tab-mainparam select{
   width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px;
   font-size:14px; line-height:1.45; background:var(--card); color:var(--text); outline:none;
@@ -1394,16 +1461,19 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
         <section class="sec">
           <div class="sec-title">白底图</div>
           <div class="img-tools">
-            <label class="btn" style="cursor:pointer">
+            <label class="btn btn-upload" style="cursor:pointer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4m0 0l-5 5m5-5l5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
               上传白底图
               <input type="file" id="imgInput" accept="image/*" hidden>
             </label>
-            <button class="btn" id="resetImgBtn">恢复默认</button>
+            <button class="btn" id="resetImgBtn" title="恢复默认白底图并复位 100%">恢复默认</button>
           </div>
-          <div class="radio-row">
-            <label class="radio-pill"><input type="radio" name="imgMode" value="contain" checked><span>完整显示</span></label>
-            <label class="radio-pill"><input type="radio" name="imgMode" value="cover"><span>铺满裁剪</span></label>
+          <div class="img-mode-field">
+            <label for="imgModeSel">图片显示方式</label>
+            <select id="imgModeSel">
+              <option value="contain">完整显示（白底图推荐）</option>
+              <option value="cover">铺满裁剪</option>
+            </select>
           </div>
         </section>
 
@@ -1531,10 +1601,24 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
       </section>
       <section class="sec">
         <div class="sec-title">产品参数（4 项 · 自动适配）</div>
-        <div class="field"><label for="mpV1">产品材质</label><textarea id="mpV1" rows="2">925银耳针，优质亲肤合金</textarea></div>
-        <div class="field"><label for="mpV2">产品尺寸</label><textarea id="mpV2" rows="2">长宽约cm</textarea></div>
-        <div class="field"><label for="mpV3">发货时效</label><textarea id="mpV3" rows="3">预计下单后24小时内发出，系统会按照下单顺序优先处理，早拍的早发，全部会在48小时内发出哈！</textarea></div>
-        <div class="field"><label for="mpV4">售后服务</label><textarea id="mpV4" rows="3">支持7天无理由退换，15天内质量问题包退换，收到货有任何问题随时联系客服</textarea></div>
+        <div class="field mp-field-mat">
+          <input class="mp-lbl-edit" id="mpL1" type="text" value="产品材质" title="点击可直接修改这一格的名称，画布上的前缀会同步变化">
+          <textarea id="mpV1" rows="2">925银耳针 优质亲肤合金</textarea>
+          <div class="mp-sugg" id="mpSugg1" role="listbox" aria-label="常用材质词"></div>
+        </div>
+        <div class="field mp-field-mat">
+          <input class="mp-lbl-edit" id="mpL2" type="text" value="产品尺寸" title="点击可直接修改这一格的名称，画布上的前缀会同步变化">
+          <textarea id="mpV2" rows="2">长宽约cm</textarea>
+          <div class="mp-sugg" id="mpSugg2" role="listbox" aria-label="常用尺寸词"></div>
+        </div>
+        <div class="field">
+          <input class="mp-lbl-edit" id="mpL3" type="text" value="发货时效" title="点击可直接修改这一格的名称，画布上的前缀会同步变化">
+          <textarea id="mpV3" rows="3">预计下单后24小时内发出，系统会按照下单顺序优先处理，早拍的早发，全部会在48小时内发出哈！</textarea>
+        </div>
+        <div class="field">
+          <input class="mp-lbl-edit" id="mpL4" type="text" value="售后服务" title="点击可直接修改这一格的名称，画布上的前缀会同步变化">
+          <textarea id="mpV4" rows="3">支持7天无理由退换，15天内质量问题包退换，收到货有任何问题随时联系客服</textarea>
+        </div>
       </section>
       <section class="sec">
         <div class="sec-title">画布尺寸（可自定义）</div>
@@ -3335,6 +3419,28 @@ document.addEventListener('keydown', (e) => {
 })();
 </script>
 <script>
+/* ---------- 输入框「清空」按钮（详情模板 / 主图参数共用，须为全局函数） ---------- */
+function attachClearBtn(ta, tipText){
+  if(!ta || ta.dataset.clrReady || !ta.parentNode) return;
+  ta.dataset.clrReady = '1';
+  const wrap = document.createElement('div');
+  wrap.className = 'mp-ta-wrap';
+  ta.parentNode.insertBefore(wrap, ta);
+  wrap.appendChild(ta);
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'clr-x';
+  btn.title = tipText || '清空该栏内容';
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3.5V9h5.5"/></svg>';
+  btn.addEventListener('click', function(e){
+    e.preventDefault(); e.stopPropagation();
+    ta.value = '';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.focus();
+  });
+  wrap.appendChild(btn);
+}
+</script>
+<script>
 // ===== 详情模板（产品参数图） =====
 (function(){
 "use strict";
@@ -3355,8 +3461,8 @@ const state = {
   rows: [
     { label:'品牌', value:'' },
     { label:'名称', value:'' },
-    { label:'尺寸', value:'', unit:'mm' },
-    { label:'材质', value:'925银针 亲肤合金', quick:['亲肤合金','925银针','999银针','优质环保合金','甄选','臻选','优质','环保','精工','高品','奢润'] },
+    { label:'尺寸', value:'长宽约mm', unit:'mm', quick:['开口可调节','均码通用'] },
+    { label:'材质', value:'925银耳针 优质亲肤合金', quick:['不过敏','不掉色','亲肤合金','925银针','999银针','优质环保合金','甄选','臻选','优质','环保','精工','高品','奢润'] },
     { label:'保养', value:'软布清洁 远离化学品 避免刮碰\n避免遇水佩戴 避免睡觉佩戴', fixed:true }
   ],
   note: '*因人工测量可能存在些许误差，请以实物为准。',
@@ -3448,13 +3554,15 @@ function drawValueSpaced(ctx, text, rightX, y, spacing){
   const chars = Array.from(String(text));
   if(chars.length === 0) return;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  /* 只在纯中文相邻字之间加字距；英文/数字（如 mm、30*6）保持紧凑，避免被拆开 */
+  const isAscii = function(ch){ return /[\x00-\x7F]/.test(ch); };
+  const gapAt = function(i){ return (i < chars.length - 1 && !isAscii(chars[i]) && !isAscii(chars[i + 1])) ? spacing : 0; };
   let total = 0;
-  chars.forEach(function(ch){ total += ctx.measureText(ch).width; });
-  total += spacing * (chars.length - 1);
+  chars.forEach(function(ch, i){ total += ctx.measureText(ch).width + gapAt(i); });
   let x = rightX - total;
-  chars.forEach(function(ch){
+  chars.forEach(function(ch, i){
     ctx.fillText(ch, x, y);
-    x += ctx.measureText(ch).width + spacing;
+    x += ctx.measureText(ch).width + gapAt(i);
   });
 }
 
@@ -3475,7 +3583,10 @@ function drawImageFit(ctx, img, box, mode, zoom){
 /* ================= 核心：把模板画到画布（严格按参考图 750×1251 比例 1:1） ================= */
 function drawTo(c, W, H){
   const ctx = c.getContext('2d');
-  const sx = W / 750, sy = H / 1251;
+  const sx = W / 750;
+  /* sy 只用于上部版式（标题、产品图、卡片起点），取所选基准高度而非自适应后的最终高度：
+     否则参数行一多、画布被拉高，上部版式被纵向撑开，表格文字与分隔线就会错位 */
+  const sy = (state.sizeH || 1920) / 1251;
 
   /* 背景：纯白画布 + 背景层（默认白色 #ffffff，颜色可自定义）仅覆盖框选区域（标题与产品图所在的上部 y140-625，全宽）；
      卡片下方保持白色（底层背景默认白色，如需灰色可手动选择颜色） */
@@ -3543,13 +3654,16 @@ function drawTo(c, W, H){
   const cardW = (712 - 36) * sx;
   const radius = Math.max(2, 10 * sx);
   const DIV_OFFS = [18.5, 20.5, 19.5, 21.5, 21.5, 21.5];
+  /* offK = 行距相对基准 53.3 的比例（等于字号缩放），分隔线、备注、卡片底都按它偏移，
+     保证无论导出高度多少，文字始终落在两线之间的同一相对位置 */
+  const offK = pitch / 53.3;
   const dividerY = function(i){
     const off = i < DIV_OFFS.length ? DIV_OFFS[i] : 21.5;
-    return Math.round(line0 + pitch * i + off * sy);
+    return Math.round(line0 + pitch * i + off * offK);
   };
   const lastDividerY = totalLines > 0 ? dividerY(totalLines - 1) : dividerY(0);
-  const noteCenterY = Math.min(Math.max(1057.5 * sy, lastDividerY + 66.5 * sy), H - 30 * sy);
-  const cardBottom = Math.max(1113 * sy, noteCenterY + 55.5 * sy);
+  const noteCenterY = Math.min(Math.max(1057.5 * sy, lastDividerY + 66.5 * offK), H - 30 * offK);
+  const cardBottom = Math.min(Math.max(1113 * sy, noteCenterY + 55.5 * offK), H - 8 * offK);
   ctx.beginPath();
   ctx.moveTo(cardLeft + radius, cardTop);
   ctx.arcTo(cardLeft + cardW, cardTop, cardLeft + cardW, cardTop + (cardBottom - cardTop), radius);
@@ -3574,7 +3688,7 @@ function drawTo(c, W, H){
 
   /* 分隔线：位置与参考图逐条一致（y713/765/814/866/916/966），色 #e8e8e8，横贯卡片 */
   ctx.strokeStyle = '#e8e8e8';
-  ctx.lineWidth = Math.max(1, 2 * sy);
+  ctx.lineWidth = Math.max(1, 2 * offK);
   for(let i = 0; i < totalLines; i++){
     const dy = dividerY(i);
     ctx.beginPath();
@@ -3608,10 +3722,18 @@ function getAutoHeight(baseH){
     total += lines.length || 1;
   });
   if(total <= 1) return baseH;
-  /* 内容所需高度（画布px）：首行 719.5*sy + (总行数-1)*基准行距 + 备注/卡片占位 143.5*sy + 底部留白 36*sx，
-     其中 sy=H/1251；底部留白与左右留白宽度一致（卡片左右各 36px 参考系），保证视觉平衡，
-     解 H = ((总行数-1)*53.3 + 36) * sx * 1251 / (1251-863)，取不小于所选固定高度、不超 5000 */
-  const needed = ((total - 1) * 53.3 + 36) * sx * 1251 / (1251 - 719.5 - 143.5);
+  /* 上部版式按所选基准高度固定（sy = baseH/1251），画布只向下延长给参数表：
+     所需高度 = 首行位置 719.5*sy + (总行数-1)*行距 + 备注间距 66.5*offK + 备注文字 20*offK + 底部留白 36*offK
+     （offK = 行距/53.3，与字号同比例；底部留白与卡片左右留白一致，视觉平衡） */
+  const sy = baseH / 1251;
+  const offK = pitch / 53.3;
+  /* 与绘制保持同一套算法：末行分隔线(+21.5) → 备注中心(+66.5) → 卡片底(+55.5)，
+     再留与卡片左右同宽的 36 作为底部留白，保证底边距和左右边距一致 */
+  const line0 = 719.5 * sy;
+  const lastDiv = line0 + (total - 1) * pitch + 21.5 * offK;
+  const noteCenter = Math.max(1057.5 * sy, lastDiv + 66.5 * offK);
+  const cardBottomNeeded = Math.max(1113 * sy, noteCenter + 55.5 * offK);
+  const needed = cardBottomNeeded + 36 * offK;
   return Math.min(Math.max(baseH, Math.ceil(needed)), 5000);
 }
 
@@ -3691,11 +3813,10 @@ $('resetImgBtn').addEventListener('click', function(){
   dtLog('已恢复默认白底图', DT_C.info);
 });
 
-/* 图片展示方式 */
-document.querySelectorAll('input[name=imgMode]').forEach(function(r){
-  r.addEventListener('change', function(){
-    if(r.checked){ state.imgMode = r.value; render(); }
-  });
+/* 图片展示方式（下拉，与主图参数页一致） */
+$('imgModeSel').value = state.imgMode;
+$('imgModeSel').addEventListener('change', function(){
+  state.imgMode = this.value; render();
 });
 
 /* 背景层颜色（可自定义） */
@@ -3713,9 +3834,11 @@ function renderRows(){
     rowEl.className = 'param-row';
 
     const lbl = document.createElement('input');
-    lbl.className = 'lbl'; lbl.type = 'text'; lbl.placeholder = '标签';
+    lbl.className = 'lbl'; lbl.type = 'text'; lbl.placeholder = '参数名';
     lbl.value = row.label;
+    lbl.title = '点击可直接修改该参数名称，画布左侧同步变化';
     lbl.addEventListener('input', function(){ row.label = this.value; scheduleRender(); });
+    lbl.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); lbl.blur(); } });
 
     const val = document.createElement('textarea');
     val.className = 'val'; val.rows = 2;
@@ -3724,6 +3847,7 @@ function renderRows(){
     val.addEventListener('input', function(){ row.value = this.value; scheduleRender(); });
 
     rowEl.appendChild(lbl); rowEl.appendChild(val);
+    attachClearBtn(val, '清空该行内容（不清除标签）');
 
     /* 新增参数行右上角删除按钮（默认行不可删，避免误删模板结构） */
     if(row.deletable){
@@ -3886,7 +4010,7 @@ const mpState = {
   W: 800, H: 800,
   fmt: 'jpg',
   cells: [            // 4 格参数：标签固定，内容可编辑（默认填充常用文案），限定各自区域
-    { label:'产品材质：', value:'925银耳针，优质亲肤合金' },
+    { label:'产品材质：', value:'925银耳针 优质亲肤合金' },
     { label:'产品尺寸：', value:'长宽约cm' },
     { label:'发货时效：', value:'预计下单后24小时内发出，系统会按照下单顺序优先处理，早拍的早发，全部会在48小时内发出哈！' },
     { label:'售后服务：', value:'支持7天无理由退换，15天内质量问题包退换，收到货有任何问题随时联系客服' }
@@ -4088,6 +4212,66 @@ function mpRender(){
 }
 const mpRenderer = mpDebounce(mpRender, 100);
 
+/* ---------- 快捷词浮层（产品材质 / 产品尺寸）：悬停显示，点选切换写入，不占布局 ---------- */
+const MP_MAT_OPTS = ['不过敏','不掉色','亲肤合金','925银针','999银针','优质环保合金','甄选','臻选','优质','环保','精工','高品','奢润'];
+const MP_SIZE_OPTS = ['开口可调节','均码通用'];
+(function(){
+  const split = function(v){ return String(v || '').split(/[\s，,、]+/).filter(Boolean); };
+  [
+    { box:'mpSugg1', input:'mpV1', cell:0, opts:MP_MAT_OPTS },
+    { box:'mpSugg2', input:'mpV2', cell:1, opts:MP_SIZE_OPTS }
+  ].forEach(function(def){
+    const box = $(def.box), el = $(def.input);
+    if(!box || !el) return;
+    const sync = function(){
+      const tokens = split(mpState.cells[def.cell].value);
+      box.querySelectorAll('.chip').forEach(function(ch){
+        ch.classList.toggle('on', tokens.indexOf(ch.getAttribute('data-opt')) !== -1);
+      });
+    };
+    def.opts.forEach(function(opt){
+      const ch = document.createElement('button');
+      ch.type = 'button'; ch.className = 'chip';
+      ch.setAttribute('data-opt', opt); ch.textContent = opt;
+      ch.addEventListener('click', function(e){
+        e.preventDefault();
+        const tokens = split(mpState.cells[def.cell].value);
+        const idx = tokens.indexOf(opt);
+        if(idx === -1){ tokens.push(opt); } else { tokens.splice(idx, 1); }
+        const v = tokens.join(' ');
+        mpState.cells[def.cell].value = v;
+        el.value = v;
+        sync();
+        mpRenderer();
+      });
+      box.appendChild(ch);
+    });
+    el.addEventListener('input', sync);
+    sync();
+  });
+})();
+
+/* ---------- 4 格名称（标签）可自定义 ---------- */
+[0, 1, 2, 3].forEach(function(i){
+  const li = $('mpL' + (i + 1));
+  if(!li) return;
+  const fitLabel = function(){
+    li.style.width = Math.max(46, li.value.length * 15 + 10) + 'px';
+  };
+  const commit = function(){
+    const t = li.value.replace(/[:：\s]+$/, '');
+    li.value = t;
+    mpState.cells[i].label = (t || '参数') + '：';
+    fitLabel();
+    mpRenderer();
+  };
+  let hadFocus = false;
+  fitLabel();
+  li.addEventListener('input', commit);
+  li.addEventListener('blur', function(){ hadFocus = false; commit(); });
+  li.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); li.blur(); } });
+});
+
 /* ---------- 4 格参数编辑 ---------- */
 [0, 1, 2, 3].forEach(function(i){
   const el = $('mpV' + (i + 1));
@@ -4096,6 +4280,7 @@ const mpRenderer = mpDebounce(mpRender, 100);
     mpState.cells[i].value = el.value;
     mpRenderer();
   });
+  attachClearBtn(el, '清空该栏内容后重新输入');
 });
 
 /* ---------- 主图上传 / 清除 / 显示方式 ---------- */
