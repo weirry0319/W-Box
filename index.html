@@ -116,21 +116,27 @@ body.dark .top-status{border-color:#1f4a38}
 #tab-image{padding:14px 20px; overflow:hidden}
 .im-main{
   flex:1; display:flex; flex-direction:column; min-height:0; gap:12px;
-  max-width:1580px; width:100%; margin:0 auto;
+  width:100%; max-width:none; margin:0;
 }
+.im-head{flex-shrink:0; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.im-head h1{font-size:18px; font-weight:800; display:flex; align-items:center; gap:10px; letter-spacing:-.2px}
+.im-head h1 .dot{width:10px; height:10px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft)}
+.im-sub{font-size:12.5px; color:var(--text-2); margin:0; min-width:0}
 .im-wb{flex:1; display:flex; gap:14px; min-height:0}
 .im-col{display:flex; flex-direction:column; gap:14px; min-width:0; min-height:0}
 .im-col-left{flex:0 0 302px; overflow-y:auto}
-.im-col-mid{flex:1 1 auto; gap:14px; display:grid; grid-template-rows:1fr 1fr 1fr}
+.im-col-mid{flex:1 1 auto; gap:0; display:flex; flex-direction:column; min-height:0}
+.im-splitter{flex:0 0 8px; position:relative; display:flex; align-items:center; justify-content:center; cursor:row-resize; touch-action:none; z-index:2}
+.im-splitter::before{content:""; width:100%; height:2px; border-radius:2px; background:var(--border-soft); transition:background .15s}
+.im-splitter::after{content:""; position:absolute; left:0; right:0; top:-5px; bottom:-5px}
+.im-splitter:hover::before, .im-splitter.drag::before{background:var(--accent)}
+body.im-resizing{user-select:none; cursor:row-resize}
+.im-col-right{flex:0 0 336px; gap:14px}
 @media(min-width:1181px){
-  .im-col-mid > .im-card:nth-child(1){grid-row:1 / span 2; min-height:0}
-  .im-col-mid > .im-card:nth-child(2){grid-row:3; min-height:0}
-}
-.im-col-right{flex:0 0 336px}
-
-/* 桌面三栏：左侧 M1-M3 各占 flex:1 三等分列高（min-height 防短视口裁切，超高时整列滚动） */
-@media(min-width:1181px){
+  .im-col-right .im-card.settings{flex:1 1 0; min-height:0}
+  /* 桌面：左列 M1-M3 与 M7 日志台均分撑满整列；右列仅 M6 独占整列 */
   .im-col-left .im-card{flex:1 1 0; min-height:140px}
+  .im-col-left .im-logbar{flex:1 1 0; min-height:140px}
 }
 
 /* 模块卡片 */
@@ -238,7 +244,7 @@ body.dark .m-badge{border-color:#2c4a3f}
 .im-btn:disabled{opacity:.5; cursor:not-allowed; pointer-events:none}
 
 /* 文件列表 */
-.file-sec{flex:2; min-height:180px}
+.file-sec{flex:3 1 0; min-height:120px}
 .file-list{overflow-y:auto; min-height:0; display:flex; flex-direction:column}
 .fi{
   display:flex; align-items:center; gap:10px; padding:9px 12px;
@@ -321,7 +327,7 @@ body.dark .m-badge{border-color:#2c4a3f}
   border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .im-switch input:checked + .im-knob{background:var(--accent-2)}
 .im-switch input:checked + .im-knob::after{left:21px}
-.pv-card{flex:1 1 0; min-height:254px}
+.pv-card{flex:2 1 0; min-height:160px}
 .pv-card .im-card-body{overflow:hidden}
 .pv-box .m-empty{position:absolute; inset:0; min-height:0; padding:14px; width:100%; height:100%}
 
@@ -385,13 +391,13 @@ input[type=range]{width:100%; accent-color:var(--accent); height:5px; cursor:poi
 /* 通栏日志台 */
 .im-logbar{
   flex-shrink:0; border:1px solid var(--border); border-radius:12px; background:var(--card);
-  overflow:hidden; display:flex; flex-direction:column; height:210px; box-shadow:var(--shadow);
+  overflow:hidden; display:flex; flex-direction:column; height:180px; box-shadow:var(--shadow);
 }
 .im-logbar-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px 10px; flex-wrap:wrap;
   padding:8px 14px; background:var(--panel); border-bottom:1px solid var(--border-soft); flex-shrink:0;
 }
-.im-logbar-head h3{font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:8px; min-width:0; color:var(--text)}
+.im-logbar-head h3{font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:8px; min-width:0; white-space:nowrap; color:var(--text)}
 .log-actions{display:flex; align-items:center; gap:8px; flex-shrink:0}
 .log-state{
   display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--ok);
@@ -414,7 +420,7 @@ body.dark .log-state{border-color:#2c4a3f}
 #tab-rename{overflow:hidden; padding:14px 20px; flex-direction:column}
 #tab-rename.active{display:flex}
 #tab-rename .rn-container{
-  max-width:1580px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column; gap:12px;
+  max-width:none; margin:0; width:100%; height:100%; display:flex; flex-direction:column; gap:12px;
   min-height:0; flex:1;
 }
 .rn-head{flex-shrink:0; margin-bottom:12px}
@@ -583,15 +589,16 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
   .im-main{flex:none; height:auto; min-height:0}
   .im-wb{flex:none; height:auto; min-height:0; flex-wrap:wrap}
   .im-col{height:auto; min-height:0}
-  .im-col-left{flex:1 1 100%; flex-direction:row; overflow:visible}
+  .im-col-left{flex:1 1 100%; flex-direction:row; overflow:visible; flex-wrap:wrap}
   .im-col-left .im-card{flex:1 1 0; min-width:0}
+  .im-col-left .im-logbar{flex:1 1 100%; min-width:0}
   .im-col-mid{flex:1 1 55%; min-width:0; display:flex; flex-direction:column; grid-template:none}
   .im-col-right{flex:1 1 320px; min-width:0}
   .file-sec{flex:none; min-height:0}
   .pv-card{flex:none; min-height:0}
   .pv-box{min-height:200px}
   .file-list{max-height:46vh}
-  .im-logbar{max-height:none}
+  .im-logbar{max-height:none; height:auto}
   .im-log{max-height:170px}
 }
 /* ===== 响应式：移动单列 ===== */
@@ -605,17 +612,18 @@ body.dark ::-webkit-scrollbar-thumb{background:#33454f}
   .im-col{flex:none; width:100%; height:auto; min-height:0; gap:10px}
   .im-col-left{overflow:visible; flex-direction:column}
   .im-col-left .im-card{flex:none; width:100%}
+  .im-col-left .im-logbar{flex:none; width:100%}
   .im-col-mid{flex:none; width:100%}
   .im-col-right{flex:none; width:100%}
   .im-card{height:auto}
   .file-sec{flex:none}
-  .pv-card{flex:none; min-height:0}
+  .pv-card{flex:none; min-height:240px}
   .settings{flex:none}
   .file-list{max-height:42vh}
   .list-body .file-list{max-height:42vh}
   .im-card-body{overflow:visible; flex:none; height:auto; min-height:0}
   .pv-box{flex:none; min-height:220px; max-height:none}
-  .im-logbar{max-height:none}
+  .im-logbar{max-height:none; height:auto}
   .im-log{max-height:200px}
   #tab-rename{overflow:visible; height:auto}
 }
@@ -1038,7 +1046,10 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
 <!-- ===== 图片处理：三栏工作台 ===== -->
 <section id="tab-image" class="active">
   <div class="im-main">
-
+    <div class="im-head">
+      <h1><span class="dot"></span>图片处理</h1>
+      <div class="im-sub">上传 PNG 顶层图层 / 文件夹 / 批量图片 → 设置缩放与拼合方式 → 实时预览 → 一键导出，全部本地处理不上传服务器</div>
+    </div>
     <div class="im-wb">
       <!-- ===== 左列：M1 顶层 / M2 文件夹 / M3 批量文件 ===== -->
       <div class="im-col im-col-left">
@@ -1116,7 +1127,22 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
             <div class="m-status" id="im-fileStatus">0张图片 · 上次目录：未记录</div>
           </div>
         </div>
-
+        <!-- ===== 左列底部：M7 系统日志台 ===== -->
+        <div class="im-logbar">
+          <div class="im-logbar-head">
+            <h3><span class="m-tag">M7</span>模块7·系统日志台</h3>
+            <div class="log-actions">
+              <span class="log-state"><span class="dot"></span>监听中</span>
+              <button class="im-btn ghost sm" onclick="imCopyLog()">复制日志</button>
+              <button class="im-btn ghost sm" onclick="imClearLog()">清空</button>
+            </div>
+          </div>
+          <div class="im-log" id="im-log"></div>
+          <div class="im-foot">
+            <span>flex 响应式 · 本地处理不传输服务器</span>
+            <span>图片工具箱</span>
+          </div>
+        </div>
       </div>
 
       <!-- ===== 中列：M4 图片列表 / M5 实时预览 ===== -->
@@ -1132,6 +1158,9 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
             <div class="file-list" id="im-fileList"></div>
           </div>
         </div>
+
+        <!-- 分隔条：上下拖动调节 M4 / M5 高度 -->
+        <div class="im-splitter" id="imSplitter" title="上下拖动调节模块4 / 模块5 高度（双击复位）"></div>
 
         <!-- M5 模块5·实时预览 -->
         <div class="im-card pv-card">
@@ -1307,23 +1336,6 @@ body.dark #tab-mainparam .mp-stage{background:repeating-conic-gradient(#232b36 0
 
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- ===== 通栏日志台 ===== -->
-    <div class="im-logbar">
-      <div class="im-logbar-head">
-        <h3><span class="m-tag">M7</span>模块7·通栏（系统日志台）</h3>
-        <div class="log-actions">
-          <span class="log-state"><span class="dot"></span>监听中</span>
-          <button class="im-btn ghost sm" onclick="imCopyLog()">复制日志</button>
-          <button class="im-btn ghost sm" onclick="imClearLog()">清空</button>
-        </div>
-      </div>
-      <div class="im-log" id="im-log"></div>
-      <div class="im-foot">
-        <span>flex 响应式 · 本地处理不传输服务器</span>
-        <span>图片工具箱</span>
       </div>
     </div>
 
@@ -2926,6 +2938,7 @@ document.addEventListener('keydown', (e) => {
     const pb = G('pvBox');
     G('pvViewport').querySelectorAll('canvas').forEach(el=>el.remove());
     pb.querySelectorAll('.pv-size-info,.pv-hint,.pv-zoom-badge').forEach(el=>el.remove());
+    pvCanvas=pvBadge=pvHint=pvInfo=null;
     G('pvEmpty').style.display = 'flex';
     G('pvLabel').style.display = 'none';
     G('pvViewport').classList.remove('zoomed');
@@ -3090,6 +3103,8 @@ document.addEventListener('keydown', (e) => {
   let pvLastIdx = -1;      // 切换图片时重置缩放
   let imPvBmp = null;      // 当前预览缓存的解码位图
   let imPvBmpKey = -1;
+  let pvCanvas = null, pvBadge = null, pvHint = null, pvInfo = null;  // 复用节点，避免每帧销毁重建
+  let pvWheelRaf = null, pvPendingAnchor = null;   // 滚轮缩放按帧合并，直接跟手
 
   // 按当前 pvZoom 重绘预览（同步，基于缓存位图）
   function drawPvAtZoom(anchor){
@@ -3098,16 +3113,16 @@ document.addEventListener('keydown', (e) => {
     if(!imPvBmp) return;
     const dims = imCalcResize(imPvBmp.width, imPvBmp.height);
     const bw = Math.max(vp.clientWidth - 20, 50), bh = Math.max(vp.clientHeight - 20, 50);
-    const fit = Math.min(bw / dims.w, bh / dims.h, 1);
+    const fit = Math.min(bw / dims.w, bh / dims.h);
     const s = fit * pvZoom;
     let pw = Math.max(1, Math.round(dims.w * s));
     let ph = Math.max(1, Math.round(dims.h * s));
     const CAP = 4096;
     const over = Math.max(pw / CAP, ph / CAP);
     if(over > 1){ pw = Math.round(pw / over); ph = Math.round(ph / over); }
-    const canvas = document.createElement('canvas');
-    canvas.width = pw; canvas.height = ph;
-    const ctx = canvas.getContext('2d');
+    if(!pvCanvas){ pvCanvas = document.createElement('canvas'); }
+    pvCanvas.width = pw; pvCanvas.height = ph;
+    const ctx = pvCanvas.getContext('2d');
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(imPvBmp, 0, 0, pw, ph);
@@ -3117,41 +3132,35 @@ document.addEventListener('keydown', (e) => {
       ctx.drawImage(imTpl, rect.x, rect.y, rect.w, rect.h);
       ctx.globalAlpha = 1;
     }
-    vp.querySelectorAll('canvas').forEach(el=>el.remove());
-    box.querySelectorAll('.pv-size-info,.pv-hint,.pv-zoom-badge').forEach(el=>el.remove());
     G('pvEmpty').style.display = 'none';
-    vp.appendChild(canvas);
+    if(pvCanvas.parentNode !== vp) vp.appendChild(pvCanvas);
     // margin:auto 自动处理：小时居中、超出时贴起点并可滚动，无跳变
     const zoomed = pvZoom > 1.001;
     vp.classList.toggle('zoomed', zoomed);
     if(zoomed){
       if(anchor){
-        const ncr = canvas.getBoundingClientRect();
+        const ncr = pvCanvas.getBoundingClientRect();
         const dw = ncr.width, dh = ncr.height;
-        const cs = getComputedStyle(vp);
-        const offX = vp.clientLeft + parseFloat(cs.paddingLeft);
-        const offY = vp.clientTop + parseFloat(cs.paddingTop);
+        const offX = vp.clientLeft + 10, offY = vp.clientTop + 10;
         vp.scrollLeft = Math.max(0, Math.round(offX + anchor.fx * dw - anchor.cursorX));
         vp.scrollTop  = Math.max(0, Math.round(offY + anchor.fy * dh - anchor.cursorY));
       } else {
         vp.scrollLeft = Math.max(0, (vp.scrollWidth - vp.clientWidth) / 2);
         vp.scrollTop  = Math.max(0, (vp.scrollHeight - vp.clientHeight) / 2);
       }
-      const zb = document.createElement('div');
-      zb.className = 'pv-size-info pv-zoom-badge';
-      zb.textContent = Math.round(pvZoom * 100) + '% · 滚轮缩放 / 双击复位';
-      box.appendChild(zb);
+      if(!pvBadge){ pvBadge = document.createElement('div'); pvBadge.className = 'pv-size-info pv-zoom-badge'; box.appendChild(pvBadge); }
+      pvBadge.style.display = '';
+      pvBadge.textContent = Math.round(pvZoom * 100) + '% · 滚轮缩放 / 双击复位';
+      if(pvHint) pvHint.style.display = 'none';
     } else {
       vp.scrollLeft = 0; vp.scrollTop = 0;
-      const ht = document.createElement('div');
-      ht.className = 'pv-hint';
-      ht.textContent = '滚轮缩放查看细节';
-      box.appendChild(ht);
+      if(!pvHint){ pvHint = document.createElement('div'); pvHint.className = 'pv-hint'; box.appendChild(pvHint); }
+      pvHint.style.display = '';
+      pvHint.textContent = '滚轮缩放查看细节';
+      if(pvBadge) pvBadge.style.display = 'none';
     }
-    const info = document.createElement('div');
-    info.className = 'pv-size-info';
-    info.textContent = `${dims.w} × ${dims.h} px`;
-    box.appendChild(info);
+    if(!pvInfo){ pvInfo = document.createElement('div'); pvInfo.className = 'pv-size-info'; box.appendChild(pvInfo); }
+    pvInfo.textContent = `${dims.w} × ${dims.h} px`;
   }
 
   // 以锚点为中心把 pvZoom 平滑过渡到 target
@@ -3180,6 +3189,7 @@ document.addEventListener('keydown', (e) => {
         if(imPvBmp){ imPvBmp.close(); imPvBmp=null; imPvBmpKey=-1; }
         G('pvViewport').querySelectorAll('canvas').forEach(el=>el.remove());
         box.querySelectorAll('.pv-size-info,.pv-hint,.pv-zoom-badge').forEach(el=>el.remove());
+        pvCanvas=pvBadge=pvHint=pvInfo=null;
         G('pvEmpty').style.display = 'flex';
         G('pvLabel').style.display = 'none';
         G('pvViewport').classList.remove('zoomed');
@@ -3202,7 +3212,7 @@ document.addEventListener('keydown', (e) => {
     }, 80);
   }
 
-  // 滚轮：以鼠标位置为中心平滑缩放
+  // 滚轮：以鼠标位置为中心直接跟手缩放（rAF 合并一帧内多次滚动，不走缓动过渡）
   G('pvBox').addEventListener('wheel', e=>{
     if(imFiles.length === 0 || !imPvBmp) return;
     e.preventDefault();
@@ -3210,14 +3220,19 @@ document.addEventListener('keydown', (e) => {
     const canvas = box.querySelector('canvas');
     if(!canvas) return;
     const factor = e.deltaY < 0 ? 1.18 : 1 / 1.18;
-    const target = Math.min(8, Math.max(1, pvZoom * factor));
+    pvZoom = Math.min(8, Math.max(1, pvZoom * factor));
     // 光标在当前画布上的分数位置（直接由 rect 算，自动兼容 fit 居中与放大态）
     const br = box.getBoundingClientRect();
     const cr = canvas.getBoundingClientRect();
     const cursorX = e.clientX - br.left, cursorY = e.clientY - br.top;
     const fx = (e.clientX - cr.left) / cr.width;
     const fy = (e.clientY - cr.top) / cr.height;
-    animateZoomTo(target, {fx, fy, cursorX, cursorY});
+    pvPendingAnchor = {fx, fy, cursorX, cursorY};
+    if(pvWheelRaf) return;
+    pvWheelRaf = requestAnimationFrame(()=>{
+      pvWheelRaf = null;
+      drawPvAtZoom(pvPendingAnchor);
+    });
   }, {passive:false});
 
   // 双击：恢复原始适配大小
@@ -3233,6 +3248,17 @@ document.addEventListener('keydown', (e) => {
     const fy = (cursorY - (cr.top - br.top)) / cr.height;
     animateZoomTo(1, {fx, fy, cursorX, cursorY});
   });
+
+  // 容器尺寸变化（拖动 M4/M5 分隔条 / 窗口缩放）时，按新尺寸重新适配预览
+  let pvRoTimer = null;
+  if(typeof ResizeObserver !== 'undefined'){
+    const pvRO = new ResizeObserver(()=>{
+      if(!imPvBmp || imPvRaf) return;   // 缩放动画进行中不打断，避免覆盖锚点滚动造成跳变
+      if(pvRoTimer) clearTimeout(pvRoTimer);
+      pvRoTimer = setTimeout(()=>{ if(!imPvRaf) drawPvAtZoom(null); }, 80);
+    });
+    pvRO.observe(G('pvBox'));
+  }
 
   // 放大后鼠标拖拽平移
   (function(){
@@ -3496,6 +3522,81 @@ document.addEventListener('keydown', (e) => {
     G('log').innerHTML = '';
     imLog('日志已清空', LC.info);
   };
+
+  // ----- M4 / M5 高度拖拽分隔条：上界对齐 M1 底部、下界对齐 M7 顶部，拖动时实时重绘预览 -----
+  (function initSplitter(){
+    const spl=document.getElementById('imSplitter');
+    const mid=document.querySelector('.im-col-mid');
+    const f=document.getElementById('im-fileSec');
+    const p=mid?mid.querySelector('.pv-card'):null;
+    if(!spl||!mid||!f||!p) return;
+    const BAR=8, MIN_F=120, MIN_P=160;
+    let startY=0, startF=0, dragging=false, moveRaf=null, pendingH=null;
+
+    function bounds(){
+      const mr=mid.getBoundingClientRect();
+      const leftCards=document.querySelectorAll('.im-col-left .im-card');
+      const m3=leftCards[2]||leftCards[leftCards.length-1]; // 上方紧邻卡片（M3）
+      const m7=document.querySelector('.im-col-left .im-logbar');
+      // 按卡片高度对齐：M4 不矮于上方 M3 高度；M5 不矮于 M7 高度（下边同理对齐 M7）
+      let minF=MIN_F, maxF=mr.height-BAR-MIN_P;
+      if(m3){ minF=Math.max(minF, m3.getBoundingClientRect().height); }
+      if(m7){ maxF=Math.min(maxF, mr.height-BAR-m7.getBoundingClientRect().height); }
+      if(minF>maxF){ minF=maxF=mr.height/2; }
+      return {minF,maxF};
+    }
+    function onDown(e){
+      dragging=true;
+      startY=e.clientY;
+      startF=f.getBoundingClientRect().height;
+      spl.classList.add('drag');
+      document.body.classList.add('im-resizing');
+      if(spl.setPointerCapture) spl.setPointerCapture(e.pointerId);
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp, {once:true});
+      document.addEventListener('pointercancel', onUp, {once:true});
+      e.preventDefault();
+    }
+    function applyH(){
+      moveRaf=null;
+      f.style.flex='none';
+      f.style.height=pendingH+'px';
+      p.style.flex='1 1 0';
+      p.style.height='auto';
+      if(imPvBmp) drawPvAtZoom(null);
+    }
+    function onMove(e){
+      if(!dragging) return;
+      const b=bounds();
+      pendingH=Math.max(b.minF, Math.min(b.maxF, startF + (e.clientY - startY)));
+      if(moveRaf) return;
+      moveRaf=requestAnimationFrame(applyH);
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging=false;
+      if(moveRaf){ cancelAnimationFrame(moveRaf); moveRaf=null; }
+      spl.classList.remove('drag');
+      document.body.classList.remove('im-resizing');
+      document.removeEventListener('pointermove', onMove);
+    }
+    function reset(){
+      f.style.flex=''; f.style.height='';
+      p.style.flex=''; p.style.height='';
+      if(imPvBmp) drawPvAtZoom(null);
+    }
+    // 进入窄屏单列布局时，清除拖拽残留的内联 flex/height，避免 flex-basis:0 把 M5 预览压塌
+    function onResize(){
+      if(window.innerWidth <= 900){
+        f.style.flex=''; f.style.height='';
+        p.style.flex=''; p.style.height='';
+        if(imPvBmp) drawPvAtZoom(null);
+      }
+    }
+    window.addEventListener('resize', onResize);
+    spl.addEventListener('pointerdown', onDown);
+    spl.addEventListener('dblclick', reset);
+  })();
 
   // 初始状态
   imUpdateModuleStatus();
